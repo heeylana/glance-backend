@@ -1,0 +1,58 @@
+{
+  "name": "glance-backend",
+  "version": "1.0.0",
+  "description": "Glance backend: resolver, prices, guards, delegated execution via Privy",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "script:delegated-swap": "tsx src/scripts/delegated-swap.ts",
+    "script:score-resolver": "tsx src/scripts/score-resolver.ts",
+    "script:capture-page": "tsx src/scripts/capture-page.ts",
+    "script:refresh-catalog": "tsx src/scripts/refresh-catalog.ts",
+    "script:cache-probe": "tsx src/scripts/cache-probe.ts",
+    "script:score-voice": "tsx src/scripts/score-voice.ts",
+    "script:compare-news": "tsx src/scripts/compare-news.ts",
+    "script:replay-explain": "tsx src/scripts/replay-explain.ts"
+  },
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.0.9",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.125.0",
+    "@coral-xyz/anchor": "^0.32.1",
+    "@hono/node-server": "^2.1.1",
+    "@solana/spl-token": "^0.4.15",
+    "@solana/spl-token-metadata": "^0.1.6",
+    "@solana/web3.js": "^1.99.0",
+    "bs58": "^6.0.0",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.13.7",
+    "jose": "^6.2.12",
+    "postgres": "^3.4.9",
+    "tweetnacl": "^1.0.3",
+    "zod": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  },
+  "private": true
+}

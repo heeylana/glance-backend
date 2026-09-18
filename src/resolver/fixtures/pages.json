@@ -1,0 +1,760 @@
+[
+  {
+    "id": "cnbc-apple-releases-ios-27-redesigned-siri-ai",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/14/apple-releases-ios-27-redesigned-siri-ai.html",
+    "capturedAt": "2026-09-15",
+    "title": "Apple releases test of redesigned Siri AI before iPhone 18 hits stores this week",
+    "publishedAt": "2026-09-14T19:05:40+0000",
+    "text": "Apple releases test of redesigned Siri AI before iPhone 18 hits stores this week\nApple on Monday released a new version of the iPhone software called iOS 27, which includes the company’s redesigned Siri AI personal assistant.\nThe new Siri AI is in beta, and users have to opt in, though they may have to sign up for a waitlist before being given access.\n“It’s personal intelligence that’s actually personal,” Apple CEO John Ternus said at the company’s iPhone launch event last week.\nIn this article\nAAPL -1.61 (-0.48%)\nIranian foreign minister will head to China for talks, as Pentagon reveals financial cost of war\nU.S. confirms for first time it has weapons deployed in space\nMitch McConnell returns to Senate after three-month health absence\n10-year Treasury yield rises to highest since 2007 as Fed rate-hike expectations rise\nChina’s wealthy now face a new obstacle: Getting out\nApple on Monday released a new version of the iPhone software called iOS 27, which includes the company’s redesigned Siri AI personal assistant, before the latest iPhones hit store shelves this week.\nThe new Siri AI is in beta, Apple said, and users have to opt in through the settings app, though they may have to add their names to the waitlist before getting access.",
+    "expect": {
+      "tickers": [
+        "AAPL"
+      ]
+    },
+    "note": "article, name + products"
+  },
+  {
+    "id": "cnbc-trump-phones-nvidia-huang-all-in-calls-d",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/14/trump-phones-nvidia-huang-all-in-calls-data-center-opposition-hoax.html",
+    "capturedAt": "2026-09-15",
+    "title": "Trump phones Nvidia’s Huang at All-In Summit, calls data center opposition a ‘hoax’",
+    "publishedAt": "2026-09-14T21:26:21+0000",
+    "text": "Trump phones Nvidia’s Huang at All-In Summit, calls data center opposition a ‘hoax’\nPresident Donald Trump called Nvidia CEO Jensen Huang while the tech exec was on stage at the All-In Summit in Los Angeles, according to social media posts from attendees.\nHuang took the call and put the president on speakerphone, videos showed.\nTrump’s remarks focused on the backlash to artificial intelligence and data center construction, a topic that’s increasingly roiling Washington.\nIn this article\nNVDA +1.34 (+0.64%)\nAfter using his social media site to blast Anthropic CEO Dario Amodei’s push for the AI industry to slow down development, President Donald Trump went a step further on Monday.\nWith Nvidia CEO Jensen Huang speaking on stage at the All-in Summit in Los Angeles, Trump called the tech exec, and was then put on speaker.",
+    "expect": {
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    "note": "article, name + exec"
+  },
+  {
+    "id": "verge-apple-intelligence-apple-home-icloud-plu",
+    "site": "article",
+    "url": "https://www.theverge.com/tech/994949/apple-intelligence-apple-home-icloud-plus-cost-subscription",
+    "capturedAt": "2026-09-15",
+    "title": "Apple Home’s new security camera features cost as much as $60 a month",
+    "publishedAt": "2026-09-14T22:28:52+00:00",
+    "text": "Apple Home’s new security camera features cost as much as $60 a month\nTECH\nNEWS\nAPPLE\nApple Intelligence upgrades to HomeKit Secure Video come with a steep cost.\nNew Apple Intelligence features for HomeKit cameras start at $10 a month and go up to $60.\nWith the public release of iOS 27 and tvOS 27, Apple Home is getting an injection of Apple Intelligence — but you’ll have to pay more for it.\nApple Intelligence for Home brings AI-powered video summaries to HomeKit Secure Video, so you can get short text descriptions of who and what compatible security cameras saw, along with the clip. It also adds a new video search feature and the ability to stitch footage from multiple cameras into one clip, making it easier to keep an eye on what’s happening around your home without scrolling through footage.\nMOST POPULAR",
+    "expect": {
+      "tickers": [
+        "AAPL"
+      ]
+    },
+    "note": "article, Apple Intelligence / HomeKit"
+  },
+  {
+    "id": "tc-nvidia-ceo-jensen-huang-tells-trump-were",
+    "site": "article",
+    "url": "https://techcrunch.com/2026/09/14/nvidia-ceo-jensen-huang-tells-trump-were-not-going-to-let-an-ai-slowdown-happen/",
+    "capturedAt": "2026-09-15",
+    "title": "Nvidia CEO Jensen Huang tells Trump 'we're not going to let [an AI slowdown] happen' | TechCrunch",
+    "publishedAt": "2026-09-14T21:51:02+00:00",
+    "text": "While Nvidia CEO Jensen Huang was onstage at the All-In Summit on Monday morning in Los Angeles, he got a phone call that he couldn’t send to voicemail — it was from President Donald Trump.\n“I’m onstage with the besties,” Huang told Trump, referring to the venture capitalists who host the podcast All-In, including tech investors Chamath Palihapitiya, Jason Calacanis, and White House advisers David Friedberg and David Sacks.\nIn a move that will spark night terrors for public relations professionals everywhere, Huang flaunted his comfort with the president by putting Trump on speaker for conference attendees to hear.\nLast day to book an exhibit table is September 18. Don’t miss out on high-impact leads, investor access, and a brand spotlight in Disrupt’s Expo Hall.\nHoly crap POTUS just phoned in @JensenHuang live on stage at All In Summit We will not lose the ai race! And whatever Dario said this weekend won’t stop our progress This made my morning!$NVDA pic.twitter.com/Sr4wV9kMfz\nHoly crap POTUS just phoned in @JensenHuang live on stage at All In Summit We will not lose the ai race! And whatever Dario said this weekend won’t stop our progress This made my morning!$NVDA pic.twitter.com/Sr4wV9kMfz — Ben Pouladian All-in Summit (@benitoz) September 14, 2026",
+    "expect": {
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    "note": "article, exec-heavy"
+  },
+  {
+    "id": "macrumors-apple-snuck-dogcow-into-ios-27-how-to",
+    "site": "article",
+    "url": "https://www.macrumors.com/2026/09/15/apple-snuck-dogcow-into-ios-27-how-to-find/",
+    "capturedAt": "2026-09-15",
+    "title": "Moof! Apple Snuck a Dogcow Into iOS 27 - Here's How to Find It",
+    "publishedAt": "2026-09-15T10:44:00+00:00",
+    "text": "If you have installed iOS 27 on your iPhone or iPadOS 27 on your iPad (download it via Settings ➝ General ➝ Software Update), Apple left a fun little easter egg for you to discover.\nMoof! Apple Snuck a Dogcow Into iOS 27 - Here's How to Find It\nOpen the Settings app, then tap through to Appearance ➝ Liquid Glass. Scroll to the bottom of the \"Welcome to Apple Park\" sample images, and went you hit the last image, keep dragging up with your finger until the word \"Moof!\" appears in the search bar overlay and the image changes.\nSay hello to Clarus. A bitmap image of the famous dogcow was originally used to demonstrate page layout in the classic Mac OS, indicating to users which orientation the paper would be in when it was printed. The original glyph it was based on was created by Susan Kare for the Cairo dingbat font that came with the original Mac in 1984, but it became the official mascot of Apple's Developer Technical Support.\nWhen Apple was a fledgling company, Mac developers regularly left fun little Easter eggs in software, but not so much these days. While surprises can still be found, they are a lot more subtle, and exist more as a nod and wink to Apple's origins rather than anything edgy or unauthorized. If you're interested, several have been found in macOS over the years.\nGet weekly top MacRumors stories in your inbox.\nPopular Stories\nHere's When iOS 27 Rolls Out Today in Every Time Zone [Update: It's Out]",
+    "expect": {
+      "tickers": [
+        "AAPL"
+      ]
+    },
+    "note": "article, iOS easter egg; light on the company name"
+  },
+  {
+    "id": "ars-apple-releases-ios-27-macos-golden-gate",
+    "site": "article",
+    "url": "https://arstechnica.com/apple/2026/09/apple-releases-ios-27-macos-golden-gate-27-with-siri-ai-and-liquid-glass-refinements/",
+    "capturedAt": "2026-09-15",
+    "title": "Apple releases iOS 27, macOS Golden Gate 27 with Siri AI and Liquid Glass refinements",
+    "publishedAt": "2026-09-14T19:28:42+00:00",
+    "text": "Apple releases iOS 27, macOS Golden Gate 27 with Siri AI and Liquid Glass refinements\nThis is also the last version of macOS to support Rosetta for Intel apps.\nAs previously announced, Apple has today released 2026’s major annual updates for its operating systems, including iOS 27, macOS 27 Golden Gate, watchOS 27, visionOS 27, and tvOS 27.\nSiri AI—a large language model-based and context-aware overhaul of the company’s Siri voice and text assistant—is the flagship feature across all these releases except one (tvOS).\nThe new Siri can respond in kind to natural language requests to do things like explain what’s on the screen and search the user’s past personal context and history (like old emails and text messages). It can also directly interact with applications when developers have added support for that.\nOther new AI features include the ability to generate Shortcut automations or Safari extensions from a prompt and additional photo editing options. There’s now a dedicated Siri app, kind of similar in some respects to the classic ChatGPT or Claude apps.\nSiri AI and other “Apple Intelligence” features are primarily driven by a handful of Apple-developed models, most of them labeled AFM 3. On-device, there’s AFM 3 Core with 3 billion parameters, and AFM 3 Core Advanced, a 20-billion-parameter model that “uses a sparse architecture, activating just 1 to 4 billion parameters at a time depending on the request.” On top of that, there are AFM 3 Cloud, ADM 3 Cloud (Image), and AFM3 Cloud Pro, more powerful models running on remote servers.\nBeyond AI\nAcross both iOS and macOS, users now have a slider to affect how transparent or opaque the “Liquid Glass” design is across the operating system.\nARS VIDEO",
+    "expect": {
+      "tickers": [
+        "AAPL"
+      ]
+    },
+    "note": "article, mentions Intel (Rosetta) in passing"
+  },
+  {
+    "id": "engadget-apple-adds-apple-tv-and-arcade-to-iclou",
+    "site": "article",
+    "url": "https://www.engadget.com/2258771/apple-adds-apple-tv-and-arcade-to-icloud-plus-subscriptions/",
+    "capturedAt": "2026-09-15",
+    "title": "Apple adds TV and Arcade to iCloud+ subscriptions in 100 countries - Engadget",
+    "publishedAt": "2026-09-15T10:26:53+00:00",
+    "text": "But the new iCloud+ bundle isn’t available in the US.\nApple adds TV and Arcade to iCloud+ subscriptions in 100 countries\nNews\nApple is upgrading its iCloud+ subscriptions in select locations. iCloud+ already gives subscribers access to bigger storage, along with privacy and security features like Private Relay that hides IP addresses and Hide My Email, which the user can use to create random email addresses. Now, the company is also bundling Apple TV and Arcade with iCloud+ subscriptions in over 100 countries.\nThe company already sells several subscription products in a bundle called Apple One, which includes iCloud+, Apple TV, Music and Arcade. But for at least $20 a month, it's a lot more expensive than a standalone iCloud+ membership. The cheapest iCloud+ plan is only $1 in the US, and it costs pretty much the equivalent of that in local currencies in other regions.\nWith the inclusion of TV and Arcade in $1 iCloud+ subscriptions, it seems like Apple is no longer pushing its One bundle in certain locations. It's possible that the company has realized that its services could achieve more growth in those regions if it makes them more affordable and accessible. As 9to5Mac notes, the company is even bundling in Apple Music Select, which will give iCloud+ subscribers access to a handful of ad-free internet radio stations. It's also worth noting that this rollout will expand Apple TV's availability to 59 new countries.",
+    "expect": {
+      "tickers": [
+        "AAPL"
+      ]
+    },
+    "note": "article, iCloud+ / Apple TV / Arcade: services names only"
+  },
+  {
+    "id": "cnbc-microsoft-ai-model-limits-anthropic-open",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/14/microsoft-ai-model-limits-anthropic-openai.html",
+    "capturedAt": "2026-09-15",
+    "title": "Microsoft sets limits for future AI models as industry throttles frontier development",
+    "publishedAt": "2026-09-14T13:00:01+0000",
+    "text": "Microsoft sets limits for future AI models as industry throttles frontier development\nMicrosoft issued a provisional code of conduct that sets limits on its future artificial intelligence models.\nThe company will listen to outside input before rolling out an update.\nThe release comes as AI figureheads propose slowing the pace of AI evolution after one researcher said frontier labs are “gambling with our lives.”\nIn this article\nMSFT -5.04 (-1.00%)\nIranian foreign minister will head to China for talks, as Pentagon reveals financial cost of war\nU.S. confirms for first time it has weapons deployed in space\nMitch McConnell returns to Senate after three-month health absence\n10-year Treasury yield rises to highest since 2007 as Fed rate-hike expectations rise\nChina’s wealthy now face a new obstacle: Getting out\nMicrosoft has posted a provisional code of conduct that would impose restrictions on its artificial intelligence models, days after Anthropic and OpenAI leaders agreed to slow development speed.",
+    "expect": {
+      "tickers": [
+        "MSFT"
+      ]
+    },
+    "note": "article, AI policy story naming OpenAI and Anthropic too"
+  },
+  {
+    "id": "tc-microsofts-new-ai-code-of-conduct-tells",
+    "site": "article",
+    "url": "https://techcrunch.com/2026/09/14/microsofts-new-ai-code-of-conduct-tells-models-not-to-hack-systems-or-trick-humans/",
+    "capturedAt": "2026-09-15",
+    "title": "Microsoft's new AI 'code of conduct' tells models not to hack systems or trick humans | TechCrunch",
+    "publishedAt": "2026-09-14T16:27:53+00:00",
+    "text": "As the AI world shifts its focus to safety and alignment, Microsoft has released a new AI code of conduct meant to guide AI models away from dangerous behavior.\nThe document is more low level than Anthropic CEO Dario Amodei’s recent call for pacing the frontier, instead focusing on the values and red lines that guide model training within Microsoft AI. Still, the result is a comprehensive guide as to how Microsoft approaches AI safety and how those ideas are implemented in practice.\nThe document begins with the prediction that, in the next decade, superintelligent AI systems will surpass human performance in most tasks. “Containing, controlling, and aligning such a powerful force is one of the greatest challenges humanity has ever faced,” the code of conduct states. “We must therefore be completely clear about why we are inventing these systems and how we intend to control them.”",
+    "expect": {
+      "tickers": [
+        "MSFT"
+      ]
+    },
+    "note": "article"
+  },
+  {
+    "id": "verge-microsoft-out-of-band-windows-11-update",
+    "site": "article",
+    "url": "https://www.theverge.com/news/995302/microsoft-out-of-band-windows-11-update-fix-issues",
+    "capturedAt": "2026-09-15",
+    "title": "Microsoft issues emergency Windows 11 update to fix its record-breaking patch",
+    "publishedAt": "2026-09-15T08:54:48+00:00",
+    "text": "Microsoft issues emergency Windows 11 update to fix its record-breaking patch\nNEWS\nTECH\nMICROSOFT\nThe out-of-band update fixes Remote Desktop, USB audio, and Hyper-V issues.\nMicrosoft has started rolling out an emergency out-of-band update to fix problems with its record-breaking September patch Tuesday update. The software giant patched nearly 1,000 flaws in its biggest update ever this month, but it also introduced some bugs that have affected businesses, developers, and gamers.\nThe September patch Tuesday affected folder shares on Hyper-V-based Linux virtual machines, Remote Desktop Services sessions, and some USB audio devices. Microsoft’s out-of-band update, released yesterday, addresses these issues across Windows 11 versions 26h1, 25H2, and 24H2. Microsoft has also released updates for Windows Server 2025 and 2022, the LTSC versions of Windows 10, and Windows Server 2012 and Windows Server 2012 R2.",
+    "expect": {
+      "tickers": [
+        "MSFT"
+      ]
+    },
+    "note": "article, Windows product story"
+  },
+  {
+    "id": "tc-amazon-prime-video-takes-on-tiktok-with",
+    "site": "article",
+    "url": "https://techcrunch.com/2026/09/14/amazon-prime-video-takes-on-tiktok-with-short-form-news-clips/",
+    "capturedAt": "2026-09-15",
+    "title": "Amazon Prime Video takes on TikTok with short-form news clips | TechCrunch",
+    "publishedAt": "2026-09-14T18:14:29+00:00",
+    "text": "Amazon Prime Video is coming after TikTok with the addition of short-form news clips. The company said on Monday that it’s expanding its news coverage to include on-demand news clips offering both local and national stories. These will be available on TVs and other living room devices, but will soon roll out to the web and Prime Video’s mobile apps, the company said.\nThe clips will be available in the News destination within the Prime Video app in its Trending Topics and the Local News carousels. They join Prime Video’s existing local, national, and world news coverage from a number of major providers, which are available to everyone in the U.S. regardless of whether they have a Prime subscription.\nAmazon could not yet confirm whether the clips on mobile would be oriented for vertical video or not, only that they would be considered short-form content on iOS and Android.",
+    "expect": {
+      "tickers": [
+        "AMZN"
+      ]
+    },
+    "note": "article, Prime Video"
+  },
+  {
+    "id": "bbc-amazon-cargo-crash",
+    "site": "article",
+    "url": "https://www.bbc.co.uk/news/articles/cx2zg554w9ko",
+    "capturedAt": "2026-09-15",
+    "title": "Amazon crash: Firm pauses work with cargo carrier after fatal incident",
+    "publishedAt": "2026-09-14T02:40:06.245Z",
+    "text": "Amazon pauses work with cargo firm after fatal crash\nE-commerce giant Amazon says it is suspending work with the firm that operated a cargo plane that was involved in a fatal crash in Miami this month.\n\"After the tragic incident last weekend, we've spent time supporting the investigation and reviewing some of the surrounding circumstances, and we've decided to pause our operations with 21 Air,\" an Amazon spokesperson said on Sunday.\nOn 6 September, the 21 Air-operated Boeing jet overshot a runway at Miami International Airport and hit several vehicles, killing five people.\nThe BBC has contacted 21 Air for comment. The firm previously said it was \"devastated by the accident\" and that it is cooperating with authorities to investigate the incident.\nThe US National Transportation Safety Board (NTSB) is leading the investigation into the crash.\nAmazon spokesperson Kelly Nantel said: \"Safety has always been our top priority, whether in our own operations or when we're working with partners.\"",
+    "expect": {
+      "tickers": [
+        "AMZN"
+      ]
+    },
+    "note": "article, BBC"
+  },
+  {
+    "id": "guardian-google-deepmind-ai-warnings",
+    "site": "article",
+    "url": "https://www.theguardian.com/technology/2026/sep/14/google-deepmind-ai-warnings",
+    "capturedAt": "2026-09-15",
+    "title": "I worked at Google DeepMind. You should listen to the warnings about AI | Alex Turner",
+    "publishedAt": "2026-09-14T12:00:59.000Z",
+    "text": "I worked at Google DeepMind. You should listen to the warnings about AI\nWe must stop companies from allowing AI to self-improve into an uncontrollable level of intelligence\n‘I tried to hold the company to its ethical commitments against supplying AI for military use. When Google broke those commitments, I resigned at significant financial cost so that I could publicly document Google’s broken promises.’ Photograph: Dan Kitwood/Getty Images\nM ajor AI lab CEOs advocated for slowing the pace of AI development this weekend. They are right to be concerned: the field runs an extremely dangerous race towards superintelligent AI. We can and should be demanding that our governments protect us from the catastrophe of out-of-control AI.\nThis July, OpenAI’s AI swarm of 700 agents broke containment to hack Hugging Face, a multi-billion dollar company. OpenAI didn’t tell the AIs to hack that company, but the AIs had different priorities: cheating on the unrelated challenge OpenAI gave them. AI researchers call this a “misalignment” between what OpenAI wanted and what the AI actually prioritized.\nMost viewed\nCristiano Ronaldo calls for lifetime bans in Saudi Pro League after Diogo Jota chants",
+    "expect": {
+      "tickers": [
+        "GOOGL"
+      ]
+    },
+    "note": "article, DeepMind opinion piece"
+  },
+  {
+    "id": "cnbc-meta-teen-app-changes",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/03/meta-teen-app-changes.html",
+    "capturedAt": "2026-09-15",
+    "title": "How Meta will pull off massive changes to its social media apps",
+    "publishedAt": "2026-09-03T12:00:01+0000",
+    "text": "How Meta will pull off massive changes to its social media apps\nMeta and a coalition of state attorneys general settled a federal case centered on teen social media addiction on Aug. 26.\nMeta agreed to pay $17 billion and make massive changes to its platforms as part of the agreement, including a two-hour limit for time spent on its apps, hidden likes, cosmetic filters disabled and the option to control autoplay of videos.\nMeta said it’ll roll out many of the default protections in the next six months, but it will take up to a year to roll out age assurances, which is notoriously tough.\nIn this article\nMETA -3.61 (-0.54%)\nMeta ’s landmark settlement in its child safety trial will precipitate the most significant change to its social media platforms for teen users ever.\nThe social media giant’s settlement with more than 40 states plus the District of Columbia and multiple territories, includes up to $17 billion in payments over 10 years, changes to the apps for teens and stricter age assurances. “It’s the highest amount of money ever paid in a case like this,” California Attorney General Rob Bonta, who led the trial, told CNBC in an interview after the settlement. “And $17 billion can do a lot of good to prevent and remediate mental health harms for kids.”",
+    "expect": {
+      "tickers": [
+        "META"
+      ]
+    },
+    "note": "article, Meta as the company"
+  },
+  {
+    "id": "verge-gm-chevy-gmc-truck-software-ui-carplay-a",
+    "site": "article",
+    "url": "https://www.theverge.com/transportation/994875/gm-chevy-gmc-truck-software-ui-carplay-android-auto",
+    "capturedAt": "2026-09-15",
+    "title": "GM updates its trucks’ native software to coexist with CarPlay",
+    "publishedAt": "2026-09-15T11:00:00+00:00",
+    "text": "GM updates its trucks’ native software to coexist with CarPlay\nTRANSPORTATION\nNEWS\nCARS\nThe automaker is introducing a new user interface for its Chevy Silverado and GMC Sierra trucks that includes, for the first time, picture-in-picture phone projection.\nGeneral Motors is polishing up the software experience in its bestselling trucks in an effort to reduce the amount of dangerous tapping and swiping that’s required to access the most-used controls. It’s also giving Apple CarPlay and Android Auto spiffy new picture-in-picture displays — which is notable given GM’s previously stated hostility to phone mirroring in its electric vehicles.\nWhen the next-generation interface makes its debut on the 2027 Chevrolet Silverado 1500 and 2027 GMC Sierra 1500 later this year, vehicle owners will see a number of changes, including slick new graphics for its advanced driver-assist system, animated transitions between displays, and simplified layouts for heavy-duty truck stuff like trailering and off-roading. And they’ll be seeing it all on 60-plus inches of screen real estate — the combined size of instrument cluster, central display, and passenger screen in some of its trucks — that’s designed to enhance but not overwhelm the driving experience.\nFor GM, larger displays do not necessarily mean more distractions. Instead, the automaker views the additional space as an opportunity to be smarter about how information is presented and to make interactive elements larger, said Colin McCormick, group product manager for Google built-in, projection, and profiles at GM. Larger buttons and bigger tap zones can make the system easier to operate, particularly under difficult driving conditions, he said.",
+    "expect": {
+      "tickers": [
+        "GM"
+      ]
+    },
+    "note": "article, GM trucks + CarPlay mention"
+  },
+  {
+    "id": "cnbc-teslas-stock-drops-as-cybercab-update-un",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/04/teslas-stock-drops-as-cybercab-update-underwhelms-nhtsa-probe.html",
+    "capturedAt": "2026-09-15",
+    "title": "Tesla's stock drops 6% as Cybercab update 'underwhelms' Wall Street",
+    "publishedAt": "2026-09-04T17:33:08+0000",
+    "text": "Tesla’s stock drops 6% as Cybercab update ‘underwhelms’ Wall Street\nTesla shares declined 6% Friday after the company’s long-awaited Cybercab update failed to dazzle investors.\nThe National Highway Traffic Safety Administration also initiated an “audit query” to determine whether the Cybercab, a “purpose-built robotaxi,” complies with U.S. safety standards.\nThe Cybercab event on Thursday was only open to invited attendees, and CEO Elon Musk didn’t make an appearance.\nIn this article\nGOOGL -3.42 (-0.98%)\nTSLA -0.22 (-0.06%)\nTesla shares slid 6% on Friday after the electric vehicle maker’s long-awaited Cybercab update failed to impress investors who are betting the company can become a major player in the U.S. robotaxi market currently dominated by Alphabet’s Waymo.\nThe Cybercab, which Tesla first showed off almost two years ago, has been in production since April. It’s a bronze-colored, two-seat robotaxi with scissor, or butterfly, doors and no steering wheel or pedals.",
+    "expect": {
+      "tickers": [
+        "TSLA"
+      ]
+    },
+    "note": "article, stock move + Cybercab"
+  },
+  {
+    "id": "cnbc-tesla-teases-no-steering-wheel-no-pedals",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/03/tesla-teases-no-steering-wheel-no-pedals-ahead-of-cybercab-update.html",
+    "capturedAt": "2026-09-15",
+    "title": "'No steering wheel, no pedals': Tesla teases fans ahead of long-awaited Cybercab update",
+    "publishedAt": "2026-09-03T11:00:02+0000",
+    "text": "‘No steering wheel, no pedals’: Tesla teases fans ahead of long-awaited Cybercab update\nTesla tantalized fans with posts on X saying “try it” and “no steering wheel, no pedals” ahead of a planned, invitation-only Cybercab event in Austin, Texas, on Thursday.\nAttendees included influencers who make money posting fan content about Musk and his companies on X.\nElon Musk’s automaker first unveiled the company’s Cybercab in October 2024.\nIn this article\nMS -1.24 (-0.60%)\nTSLA -0.20 (-0.06%)\nIranian foreign minister will head to China for talks, as Pentagon reveals financial cost of war\nU.S. confirms for first time it has weapons deployed in space\nMitch McConnell returns to Senate after three-month health absence\n10-year Treasury yield rises to highest since 2007 as Fed rate-hike expectations rise\nChina’s wealthy now face a new obstacle: Getting out\nTesla’s fledgling Robotaxi business teased fans with a post on X saying, “no steering wheel, no pedals,” a reference to the company’s forthcoming Cybercab driverless vehicles. Another post prompted riders to “try it out” in Austin, Texas, and CEO Elon Musk said in a pinned post, “A storm of Cybercabs.”\nThose comments on Wednesday came ahead of an invite-only event in Austin on Thursday. Attendees agreed not to record or disclose certain information without Tesla’s permission, and the event wasn’t livestreamed.",
+    "expect": {
+      "tickers": [
+        "TSLA"
+      ]
+    },
+    "note": "article, product tease"
+  },
+  {
+    "id": "cnbc-ford-1-billion-investment-kentucky-plant",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/10/ford-1-billion-investment-kentucky-plant.html",
+    "capturedAt": "2026-09-15",
+    "title": "Ford announces $1 billion investment at Kentucky plant following DOT criticism on China",
+    "publishedAt": "2026-09-10T16:57:43+0000",
+    "text": "Ford announces $1 billion investment at Kentucky plant following DOT criticism on China\nFord said it is investing $1 billion to build a new paint shop at its Kentucky truck plant.\nIt follows Transportation Secretary Sean Duffy expressing “profound concern” about the automaker’s ties to Chinese companies.\nFord said it will break ground on the facility later this year.\nIn this article\nF UNCH\nDETROIT — Ford Motor on Thursday announced a $1 billion investment to build a new paint shop at its crucial Kentucky Truck Plant.\nThe facility, which Ford has called its most important and profitable plant globally, produces the automaker’s large F-250 to F-550 Super Duty trucks as well as the Ford Expedition and Lincoln Navigator SUVs.",
+    "expect": {
+      "tickers": [
+        "F"
+      ]
+    },
+    "note": "article, Ford: ambiguous name, finance context"
+  },
+  {
+    "id": "cnbc-2027-chevy-silverado-gmc-sierra-to-debut",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/15/2027-chevy-silverado-gmc-sierra-to-debut-gms-new-software-experience.html",
+    "capturedAt": "2026-09-15",
+    "title": "GM launching new customer software experience with redesigned Chevy, GMC pickups",
+    "publishedAt": "2026-09-15T11:00:01+0000",
+    "text": "GM launching new customer software experience with redesigned Chevy, GMC pickups\nGM is releasing a new vehicle infotainment system beginning later this year with its redesigned Chevrolet Silverado and GMC Sierra pickup trucks.\nVehicles are becoming more digital, but their software interfaces for drivers have posed issues in the past.\nGM is in part trying to improve how drivers can use third-party systems from Apple and Google alongside its own software.\nIn this article\nGM +0.27 (+0.31%)\nAAPL -1.82 (-0.55%)\nGOOGL -3.42 (-0.98%)\nIranian foreign minister will head to China for talks, as Pentagon reveals financial cost of war\nU.S. confirms for first time it has weapons deployed in space\nMitch McConnell returns to Senate after three-month health absence\n10-year Treasury yield rises to highest since 2007 as Fed rate-hike expectations rise\nChina’s wealthy now face a new obstacle: Getting out\nDETROIT — General Motors is releasing a new in-vehicle information and entertainment software experience for its customers, beginning later this year with its redesigned Chevrolet Silverado and GMC Sierra pickup trucks, it said Tuesday.",
+    "expect": {
+      "tickers": [
+        "GM"
+      ]
+    },
+    "note": "article, GM via Chevy/GMC products"
+  },
+  {
+    "id": "cnbc-novo-nordisk-rebrands-to-novo-ceo-mike-d",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/14/novo-nordisk-rebrands-to-novo-ceo-mike-doustdar.html",
+    "capturedAt": "2026-09-15",
+    "title": "Novo CEO tells CNBC why drugmaker is rebranding, needs to 'rethink' obesity strategy",
+    "publishedAt": "2026-09-14T07:00:01+0000",
+    "text": "Novo CEO tells CNBC why drugmaker is rebranding, needs to ‘rethink’ obesity strategy\nNovo Nordisk said it is rebranding its name to “Novo” and updating its corporate culture, as the company works to win back market share in the obesity drug space.\nIn an exclusive interview with CNBC, Novo CEO Mike Doustdar said the rebrand and culture shift are “part of the same package” for the company to evolve its strategy as it faces stiffer competition from Eli Lilly.\nNovo laid out new principles that the company will operate under, including achieving focus and speed through clear priorities and simplified workflows.\nIn this article\nNVO -0.63 (-1.45%)\nIranian foreign minister will head to China for talks, as Pentagon reveals financial cost of war\nU.S. confirms for first time it has weapons deployed in space\nMitch McConnell returns to Senate after three-month health absence\n10-year Treasury yield rises to highest since 2007 as Fed rate-hike expectations rise\nChina’s wealthy now face a new obstacle: Getting out\nNovo Nordisk on Monday said it is rebranding its name to “Novo” and updating its corporate culture, as the company works to win back market share in the obesity drug space.\nThe Danish drugmaker called the changes the beginning of a new chapter, as it has been grappling with stiff competition from chief rival Eli Lilly and investor pressure to deliver new blockbuster products and chart a path toward long-term growth. Novo is preparing to detail its business strategy changes during its Capital Markets Day event on Sept. 21.",
+    "expect": {
+      "tickers": [
+        "NVO"
+      ]
+    },
+    "note": "article, Novo rebrand"
+  },
+  {
+    "id": "cnbc-novo-nordisk-ceo-defends-lawsuit-against",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/08/12/novo-nordisk-ceo-defends-lawsuit-against-eli-lilly.html",
+    "capturedAt": "2026-09-15",
+    "title": "Novo Nordisk CEO defends lawsuit against Eli Lilly: 'Competition has to be fair'",
+    "publishedAt": "2026-08-12T22:53:21+0000",
+    "text": "Monday - Friday, 6:00 - 7:00 PM ET\nNovo Nordisk CEO defends lawsuit against Eli Lilly: 'Competition has to be fair'\nNovo Nordisk CEO Mike Doustdar defended the drugmaker's decision to sue rival Eli Lilly over its weight-loss drug advertising.\n\"I am a big fan of competition. I think competition has to be fierce, but I also think competition has to be fair,\" Doustdar said on CNBC's \"Mad Money.\" \"I believe that patients deserve to know the full truth together with their physicians before they make a choice of what product to take.\"\nIn this article\nNVO\nLLY\nNovo Nordisk CEO Mike Doustdar on Wednesday defended the drugmaker's decision to sue rival Eli Lilly over its weight-loss drug advertising.",
+    "expect": {
+      "tickers": [
+        "NVO",
+        "LLY"
+      ]
+    },
+    "note": "article, two pharma names: multiple is correct"
+  },
+  {
+    "id": "cnbc-hims-hers-ceo-andrew-dudum-ftc-lawsuit-g",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/08/18/hims-hers-ceo-andrew-dudum-ftc-lawsuit-glp-1s-ai.html",
+    "capturedAt": "2026-09-15",
+    "title": "Hims & Hers CEO says FTC lawsuit misunderstands how the company works",
+    "publishedAt": "2026-08-18T14:20:05+0000",
+    "text": "Hims & Hers CEO says FTC lawsuit misunderstands how the company works\nHims & Hers CEO Andrew Dudum defended the company against against an FTC lawsuit over its data sharing and subscription practices.\nIn an interview with CNBC, he also said the company's sale of compounded GLP-1 drugs helped to bring prices for the treatments down.\nDudum said Hims & Hers is developing its own AI agents.\nIn this article\nHIMS\nHims & Hers CEO Andrew Dudum defended the telehealth company amid a Federal Trade Commission lawsuit over its data sharing practices.\nIn a wide-ranging exclusive interview aired Tuesday, Dudum contended the allegations stemmed from a misunderstanding of how the company is altering healthcare.\n\"I can't say much other than the fact that, you know when you're changing the fundamental understanding of how a traditional system like healthcare works, and you're rebuilding it in the digital ecosystem,\" he told Andrew Ross Sorkin on CNBC's \"Squawk Box.\" \"I think it takes time for people to understand how to do that the right way, and we've worked for many years with the FTC to walk them through that. And I think ultimately they wanted more of a headline than than a real agreement here.\"",
+    "expect": {
+      "tickers": [
+        "HIMS"
+      ]
+    },
+    "note": "article, Hims & Hers"
+  },
+  {
+    "id": "cnbc-disney-dis-earnings-q3-2026",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/08/05/disney-dis-earnings-q3-2026.html",
+    "capturedAt": "2026-09-15",
+    "title": "Disney tops earnings estimates as parks and streaming offer a boost",
+    "publishedAt": "2026-08-05T04:01:01+0000",
+    "text": "Disney tops earnings estimates as parks and streaming offer a boost\nDisney posted a substantial beat on earnings for its fiscal third quarter, though it slightly missed revenue estimates.\nRevenue for the company’s experiences division, which includes parks and cruises, was up 10% year over year.\nDisney’s entertainment streaming unit was lifted by growth in subscribers as well as price hikes.\nIn this article\nDIS -0.34 (-0.31%)\nDisney posted mixed quarterly results on Wednesday, far surpassing Wall Street expectations for earnings while slightly missing estimates for revenue.\nThe company’s quarterly results were once again lifted by its parks and streaming divisions.\nRevenue for Disney’s experiences segment, which includes global theme parks and cruises, was up 10% year over year to $9.97 billion. That growth came even as macroeconomic uncertainty continues to mount for consumers and appears to weigh on Disney’s parks peers.",
+    "expect": {
+      "tickers": [
+        "DIS"
+      ]
+    },
+    "note": "article, earnings"
+  },
+  {
+    "id": "cnbc-berkshire-ceo-says-japanese-bond-yields",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/02/berkshire-ceo-says-japanese-bond-yields-not-a-challenge-for-trading-houses.html",
+    "capturedAt": "2026-09-15",
+    "title": "Berkshire CEO Greg Abel says Japanese bond yields not a challenge for trading houses right now",
+    "publishedAt": "2026-09-02T11:09:15+0000",
+    "text": "Berkshire CEO Greg Abel says Japanese bond yields not a challenge for trading houses right now\nBerkshire Hathaway CEO Greg Abel said that high bond yields aren’t a major challenge for Japanese trading houses that the company has investments in.\nThe Japanese 10-year bond yield hit a 30-year high this week, as global bond yields suffered yet another sell-off.\nAbel also detailed how Berkshire was able to obtain a more than 10% stake in each of the five major trading firms in Japan, when it previously promised to not cross the double-digit level.\nIn this article\nBRK.B +0.55 (+0.11%)\n8001.T-JP -19.50 (-0.83%)\n8002.T-JP -139.00 (-2.73%)\n8058.T-JP -81.00 (-1.62%)\n8031.T-JP -95.00 (-1.84%)\n8053.T-JP -40.50 (-2.24%)\nBerkshire Hathaway’s CEO Greg Abel said that rising yields in Japan isn’t impacting the major trading houses in the country the holding company has stakes in.",
+    "expect": {
+      "tickers": [
+        "BRK.B"
+      ]
+    },
+    "note": "article, Berkshire via alias + exec"
+  },
+  {
+    "id": "cnbc-walmart-wmt-q2-2027-earnings",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/08/20/walmart-wmt-q2-2027-earnings.html",
+    "capturedAt": "2026-09-15",
+    "title": "Walmart stock tumbles 9% after outlook disappoints Wall Street",
+    "publishedAt": "2026-08-20T04:01:01+0000",
+    "text": "Walmart stock tumbles 9% after outlook disappoints Wall Street\nWalmart beat Wall Street expectations for its fiscal second-quarter sales and hiked its full-year outlook.\nCFO John David Rainey told CNBC the retailer was eligible to get $2.9 billion in tariff refunds and has just under $100 million yet to receive. He said Walmart plans to use those refunds to lower prices.\nWalmart also said it saw another quarter of strong e-commerce and membership growth.\nIn this article\nWMT -0.40 (-0.37%)\nWalmart on Thursday posted quarterly sales that beat Wall Street estimates and raised its outlook for the year, as it saw another strong quarter of e-commerce growth and benefited from tariff refunds.\n“Our business is strong,” CFO John David Rainey told CNBC. “We feel really good about the progress we’re making.”\nThe retailer said revenue rose 5.9% in its fiscal second quarter as e-commerce sales jumped 23% globally. Walmart also said U.S. comparable sales grew 2.6%, offset in part by a 0.8% headwind in its health and wellness business as price caps on certain drugs took effect. That was less than the 3.5% increase Wall Street expected, according to FactSet.",
+    "expect": {
+      "tickers": [
+        "WMT"
+      ]
+    },
+    "note": "article, earnings"
+  },
+  {
+    "id": "cnbc-heres-why-jim-cramer-is-putting-costco-s",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/03/heres-why-jim-cramer-is-putting-costco-stock-is-in-the-penalty-box-.html",
+    "capturedAt": "2026-09-15",
+    "title": "Here's why Jim Cramer is putting Costco stock in the penalty box ",
+    "publishedAt": "2026-09-03T19:44:42+0000",
+    "text": "Here’s why Jim Cramer is putting Costco stock in the penalty box\nJim Cramer said Thursday that “something’s wrong” at Costco , and he plans to get to the bottom of it one way or another.\nMORE IN ANALYSIS",
+    "expect": {
+      "tickers": [
+        "COST"
+      ]
+    },
+    "note": "article, Cramer column"
+  },
+  {
+    "id": "cnbc-starbucks-ceo-brian-niccol-cafe-renovati",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/10/starbucks-ceo-brian-niccol-cafe-renovations-customer-service.html",
+    "capturedAt": "2026-09-15",
+    "title": "Starbucks CEO Brian Niccol says next stage of turnaround focuses on cafe makeovers, customer experience",
+    "publishedAt": "2026-09-10T13:50:22+0000",
+    "text": "Starbucks CEO Brian Niccol says next stage of turnaround focuses on cafe makeovers, customer experience\nStarbucks CEO Brian Niccol said the next step in the chain’s turnaround involves prioritizing cafe makeovers and continuing to improve the customer experience.\nDuring Niccol’s tenure over the last two years, Starbucks has tried to win back coffee drinkers by returning to its roots.\nIn the company’s fiscal third quarter, its same-store sales rose 7.9%, lifted by strong performance in the U.S.\nIn this article\nSBUX -0.12 (-0.12%)\nIranian foreign minister will head to China for talks, as Pentagon reveals financial cost of war\nU.S. confirms for first time it has weapons deployed in space\n10-year Treasury yield rises to highest since 2007 as Fed rate-hike expectations rise\nMitch McConnell returns to Senate after three-month health absence\nTwo years into Starbucks ’ turnaround, CEO Brian Niccol is prioritizing makeovers for the coffee chain’s cafes and improving the customer experience as sales rebound.\nChina’s wealthy now face a new obstacle: Getting out\n“Starbucks is back,” Niccol said on CNBC’s “Squawk Box” on Thursday.\nUnder Niccol’s leadership, Starbucks has tried to win back coffee drinkers by returning to its roots. The plan, called “Back to Starbucks,” has emphasized improving the experience for both customers and baristas and reminding lapsed loyalists why they used to love the coffee chain.",
+    "expect": {
+      "tickers": [
+        "SBUX"
+      ]
+    },
+    "note": "article, exec + name"
+  },
+  {
+    "id": "cnbc-broadcom-ceo-on-anthropics-slowdown-push",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/14/broadcom-ceo-on-anthropics-slowdown-push-ai-revenue-targets-havent-changed.html",
+    "capturedAt": "2026-09-15",
+    "title": "Broadcom CEO addresses Anthropic's slowdown push, says AI revenue targets haven't changed",
+    "publishedAt": "2026-09-14T22:43:25+0000",
+    "text": "Monday - Friday, 6:00 - 7:00 PM ET\nBroadcom CEO addresses Anthropic’s slowdown push, says AI revenue targets haven’t changed\nBroadcom CEO Hock Tan said demand for AI infrastructure remains strong despite growing concerns about increasingly powerful models.\nTan agreed that AI needs safeguards but said the technology will “create huge value,” comparing its potential impact to the Industrial Revolution.\nIn this article\nANTHR.FG +316.03 (+115.77%)\nAVGO +1.37 (+0.40%)\nBroadcom CEO Hock Tan on Monday brushed off concerns about what a potential slowdown in frontier AI model development could mean for the chipmaker’s business, telling CNBC that the company stands by its long-term revenue targets.\nTan’s comments came as investors were rattled by Anthropic CEO Dario Amodei’s weekend essay advocating for a moderation in the pace of model development. Amodei’s message, which received support from OpenAI CEO Sam Altman and Elon Musk, prompted investors in AI infrastructure providers to reconsider their expectations for compute demand during Monday’s session.",
+    "expect": {
+      "tickers": [
+        "AVGO"
+      ]
+    },
+    "note": "article, Broadcom CEO on Anthropic"
+  },
+  {
+    "id": "cnbc-crowdstrike-ceo-anthropics-ai-safety-war",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/14/crowdstrike-ceo-anthropics-ai-safety-warning.html",
+    "capturedAt": "2026-09-15",
+    "title": "CrowdStrike CEO on Anthropic’s AI safety warning: ‘The genie’s out of the bottle’",
+    "publishedAt": "2026-09-14T22:41:44+0000",
+    "text": "Monday - Friday, 6:00 - 7:00 PM ET\nCrowdStrike CEO on Anthropic’s AI safety warning: ‘The genie’s out of the bottle’\nCrowdStrike CEO George Kurtz said slowing AI development won’t eliminate the risks because potentially dangerous models are already widely available.\nKurtz said companies need stronger AI-powered cybersecurity to monitor and control agents once they are deployed.\nIn this article\nCRWD -4.43 (-1.88%)\nANTHR.FG +316.03 (+115.77%)\nCrowdStrike CEO George Kurtz said Monday that slowing the development of increasingly powerful artificial intelligence models won’t eliminate their security risks.\n“The genie’s out of the bottle,” Kurtz said on CNBC’s “Mad Money.” “There’s plenty of models that are already out there, both frontier as well as open-weight models, that can already be dangerous.”",
+    "expect": {
+      "tickers": [
+        "CRWD"
+      ]
+    },
+    "note": "article, CrowdStrike CEO"
+  },
+  {
+    "id": "cnbc-larry-ellison-nixes-plan-to-offload-up-t",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/12/larry-ellison-nixes-plan-to-offload-up-to-7point5-billion-worth-of-oracle-stock-.html",
+    "capturedAt": "2026-09-15",
+    "title": "Larry Ellison nixes plan to offload up to $7.5 billion worth of Oracle stock ",
+    "publishedAt": "2026-09-12T17:14:56+0000",
+    "text": "Larry Ellison nixes plan to offload up to $7.5 billion worth of Oracle stock\nLarry Ellison has canceled his plan to sell up to 50 million of his shares in Oracle, or $7.5 billion worth of stock at the current price.\nThe cancellation came a day after Oracle disclosed in a regulatory filing a trading plan for its founder to sell shares.\nBillionaire Ellison has held a substantial part of the company since its founding.\nIn this article\nORCL -0.84 (-0.58%)\nIranian foreign minister will head to China for talks, as Pentagon reveals financial cost of war\nU.S. confirms for first time it has weapons deployed in space\n10-year Treasury yield rises to highest since 2007 as Fed rate-hike expectations rise\nMitch McConnell returns to Senate after three-month health absence\nChina’s wealthy now face a new obstacle: Getting out\nLarry Ellison has canceled his plan to sell up to 50 million of his shares in Oracle , or $7.5 billion worth of stock at the current price.\nThe reversal came just a day after a regulatory filing disclosed the Oracle founder’s trading plan, which had been adopted on June 22 and was set to end on Oct. 24.",
+    "expect": {
+      "tickers": [
+        "ORCL"
+      ]
+    },
+    "note": "article, Oracle: ambiguous name, exec + finance context"
+  },
+  {
+    "id": "tc-salesforce-and-nvidias-new-reasoning-mod",
+    "site": "article",
+    "url": "https://techcrunch.com/2026/09/15/salesforce-and-nvidias-new-reasoning-model-is-everything-the-ai-labs-should-fear/",
+    "capturedAt": "2026-09-15",
+    "title": "Salesforce and Nvidia's new reasoning model is everything the AI labs should fear | TechCrunch",
+    "publishedAt": "2026-09-15T12:00:00+00:00",
+    "text": "A new AI model called Koa is one of the biggest announcements from Salesforce this week at its giant Dreamforce tech conference. Koa is the company’s first reasoning model, built on Nvidia’s open-weight Nemotron model. The two companies worked together to post-train Koa to excel at sales, marketing, and customer-support-related tasks.\nKoa is a shining example of how the enterprise world’s needs for AI are diverging from what the frontier labs are offering. Proprietary AI labs would rather have enterprises uploading files, code, prompts, and feedback directly into their models and agents, and spending millions to do so.\nBut with the model, Salesforce is offering its enterprise customers:\nan open-weight alternative to closed frontier models\nLast day to book an exhibit table is September 18. Don’t miss out on high-impact leads, investor access, and a brand spotlight in Disrupt’s Expo Hall.\na model trained to do specific work tasks (rather than to solve impossible math problems)\none that has not ingested any actual customer data and therefore cannot leak it to others",
+    "expect": {
+      "tickers": [
+        "CRM",
+        "NVDA"
+      ]
+    },
+    "note": "article, joint Salesforce + Nvidia story"
+  },
+  {
+    "id": "guardian-portland-bnb-airbnb-silicon-valley-lega",
+    "site": "article",
+    "url": "https://www.theguardian.com/technology/2026/sep/14/portland-bnb-airbnb-silicon-valley-legal-battle-festival",
+    "capturedAt": "2026-09-15",
+    "title": "‘We’re not going to back down’: tiny Dorset B&B stands up to Airbnb’s legal bid to ‘monopolise’ letters ‘bnb’",
+    "publishedAt": "2026-09-14T08:27:52.000Z",
+    "text": "‘We’re not going to back down’: tiny Dorset B&B stands up to Airbnb’s legal bid to ‘monopolise’ letters ‘bnb’\n‘We do things differently here in Portland’: Rocca Holly-Nambi, director of b-side, and Cat Wightman, manager of the bnb-side guesthouse. Photograph: Pete Millson\nThree little letters - bnb-side’s name is a play on the local b-side arts festival, but Silicon Valley colossus sees threat to global brand\nI n one corner is bnb-side, a six-room bed and breakfast on the Isle of Portland – a tiny wedge of limestone tied by a narrow ribbon of shingle to the Dorset coast – that was created to help secure the future of the rock’s much-loved arts festival, b-side.",
+    "expect": {
+      "tickers": [
+        "ABNB"
+      ]
+    },
+    "note": "article, Airbnb"
+  },
+  {
+    "id": "wiki-rivian",
+    "site": "generic",
+    "url": "https://en.wikipedia.org/wiki/Rivian",
+    "capturedAt": "2026-09-15",
+    "title": "Rivian - Wikipedia",
+    "text": "Rivian Automotive, Inc., is an American electric vehicle manufacturer and automotive technology company founded in 2009. It produces an electric sport utility vehicle (SUV) and a pickup truck, both on a \"skateboard\" platform that can support future vehicles and be adopted by other companies. They also produce an electric delivery van, the Rivian EDV.[12] The EDV is sold to Amazon for its deliveries. It started deliveries of its R1T pickup truck in late 2021, R1S sport utility vehicle in 2023, and R2 midsize SUV in 2026. The company also operates the Rivian Adventure Network, an open DC fast charging network in the United States.[13]\nAvera Automotive\nMainstream Motors\nNasdaq: RIVN (Class A)\nRussell 1000 component\nAutomotive\nEnergy storage\nRivian is based in Irvine, California, with its manufacturing plant in Normal, Illinois, and other facilities in Palo Alto, California; Carson, California; Plymouth, Michigan; Vancouver, British Columbia; Wittmann, Arizona; Woking, England; and Belgrade, Serbia.[14][15] Rivian has plans to build another US$5 billion factory in Social Circle, Georgia.[16] The company raised over US$13.5 billion in financing following its initial public offering in November 2021.[17][18]\nRivian\nRJ Scaringe (CEO)\nElectric vehicles\nBatteries\nHistory\nElectric vehicle charging[4]\nVehicle insurance[5]\nSoftware and services[6]\nBeginnings (2009)\nThe company was founded in Rockledge, Florida[19] in 2009 as Mainstream Motors by RJ Scaringe.[20] After being renamed as Avera Automotive[21] or Avera Motors, and finally Rivian Automotive in 2011 (a word play on the Indian River in Florida, where Scaringe grew up),[22] the company began focusing on autonomous and electric vehicles.[23]\nVolkswagen Group (15.9%)\nAmazon (12.28%)\nOryx Global (8.6%)\nVanguard (5.1%)\nRivian's first car model was intended to be a sports car. This vehicle, dubbed the R1, was prototyped as a mid-engine hybrid coupe for the U.S. market, designed by Peter Stevens.[24] However, it was shelved in late 2011 as Rivian looked to restart its business in an effort to have a larger impact on the automotive industry.[25]\nRivian received a large investment and grew significantly in 2015, opening research facilities in Michigan and the San Francisco Bay Area.[26] Shortly thereafter, Rivian began working exclusively on electric autonomous vehicles, in an attempt to build a network of related products.[27] It also began gearing its prototypes toward the \"ride-sharing and driverless car markets.\"[28]\nSetting up production (2016)\nBy September 2016, Rivian was negotiating to buy a manufacturing plant formerly owned by Mitsubishi Motors in Normal, Illinois.[26][29][30] In January 2017, Rivian acquired the plant and its manufacturing machinery for $16 million, with the plant to become Rivian's primary North American manufacturing facility.[26][27][29][31] Rivian's acquisition of a near production-ready facility instead of building a new factory has been likened to Tesla's acquisition of the NUMMI plant in California.[31][29]",
+    "expect": {
+      "tickers": [
+        "RIVN"
+      ]
+    },
+    "note": "generic, untokenized company (Rivian): resolve, then 'not on-chain yet'"
+  },
+  {
+    "id": "wiki-palantir-technologies",
+    "site": "generic",
+    "url": "https://en.wikipedia.org/wiki/Palantir_Technologies",
+    "capturedAt": "2026-09-15",
+    "title": "Palantir - Wikipedia",
+    "text": "Palantir Technologies Inc. (/ˈpælənˌtɪər/)[3] is an American publicly traded company that develops data integration and analytics software.[4] Palantir is headquartered in Miami, Florida, and was founded in 2003 by Peter Thiel,[5] Stephen Cohen,[6] Joe Lonsdale,[7] Alex Karp,[8] and Nathan Gettings.[9][10]\nPalantir's customer base includes federal agencies, state and local governments, international organizations, and also private companies.[11] The company has four main operating systems: Gotham, Foundry, Apollo, and AIP. Gotham is an intelligence tool used by militaries and counter-terrorism analysts, including the United States Intelligence Community and United States Department of Defense. Multiple police departments have used Gotham for crime analysis.[12][13] Apollo is a platform to facilitate continuous integration/continuous delivery (CI/CD) across all environments.[14][15]\nPalantir\nNasdaq: PLTR (Class A)\nNasdaq-100 component\nS&P 100 component\nIts software as a service (SaaS) is one of five offerings the U.S. Department of Defense authorized for Mission Critical National Security Systems (IL5).[16][17][18] Palantir has been used for data integration and analysis by corporate clients such as Morgan Stanley, Merck KGaA, Airbus, Wejo, Lilium, PG&E and Fiat Chrysler Automobiles.[19]\nS&P 500 component\nPeter Thiel\nStephen Cohen\nAlex Karp\nJoe Lonsdale\nNathan Gettings\nPeter Thiel (chairman)\nAlex Karp (CEO)\nPalantir has been criticized for its involvement in expanding government surveillance through artificial intelligence and facial recognition systems.[20][21] Critics have raised concerns about its contracts with the Trump administration and the aggregation of sensitive data on Americans.[22][23] Civil liberties organizations have criticized Palantir's police technology as predictive policing. CEO Alex Karp disputes this characterization.[12][13] Others observe that Palantir does not collect or store data, but only helps analyze data that customers have already collected and provides services and platforms where customers retain the rights, although examples of data management failures have been noted.[24][25][26] Some note the active or passive responsibility of Thiel and Karp in allowing conspiracy theories about Palantir to spread.[27][28][29]\nStephen Cohen (president)\nPalantir Gotham\nPalantir Foundry\nPalantir Apollo\nHistory\n2003–2008: Founding and early years\nPalantir was founded in 2003.[30][31][32] Thiel named the startup after the \"seeing stone\" in J. R. R. Tolkien's legendarium. Likewise, Palantir's office locations have names from Tolkien: The Shire (Palo Alto, California), Rivendell (McLean, Virginia), and Grey Havens (London, U.K.).[33][34] In 2013, Thiel said Palantir was a \"mission-oriented company\" that could apply software similar to PayPal's fraud recognition systems to \"reduce terrorism while preserving civil liberties\".[35] In 2004, Thiel bankrolled the creation of a prototype by PayPal engineer Nathan Gettings and Stanford University students Joe Lonsdale and Stephen Cohen. The same year, he hired Alex Karp, a former colleague of his from Stanford Law School, as chief executive officer.[36]",
+    "expect": {
+      "tickers": [
+        "PLTR"
+      ]
+    },
+    "note": "generic, Wikipedia company page"
+  },
+  {
+    "id": "yt-iphone-17-review",
+    "site": "youtube",
+    "url": "https://www.youtube.com/watch?v=rng_yUSwrgU",
+    "capturedAt": "2026-09-15",
+    "title": "iPhone 17 Review: No Asterisks!",
+    "publishedAt": "2025-10-01T13:41:40-07:00",
+    "text": "iPhone 17 Review: No Asterisks!",
+    "expect": {
+      "tickers": [
+        "AAPL"
+      ]
+    },
+    "note": "youtube, iPhone review (demo step)"
+  },
+  {
+    "id": "yt-cybertruck-review",
+    "site": "youtube",
+    "url": "https://www.youtube.com/watch?v=O0cs8aIXgkc",
+    "capturedAt": "2026-09-15",
+    "title": "Tesla Cybertruck Review: Already Iconic?",
+    "publishedAt": "2024-03-29T15:57:31-07:00",
+    "text": "Tesla Cybertruck Review: Already Iconic?",
+    "expect": {
+      "tickers": [
+        "TSLA"
+      ]
+    },
+    "note": "youtube, Cybertruck review"
+  },
+  {
+    "id": "yt-rtx-5090-review",
+    "site": "youtube",
+    "url": "https://www.youtube.com/watch?v=Q82tQJyJwgk",
+    "capturedAt": "2026-09-15",
+    "title": "The RTX 5090 - Our Biggest Review Ever",
+    "publishedAt": "2025-01-23T06:00:05-08:00",
+    "text": "The RTX 5090 - Our Biggest Review Ever",
+    "expect": {
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    "note": "youtube, RTX 5090 review"
+  },
+  {
+    "id": "cnbc-sam-altman-ai-slowdown-anthropic-amodei",
+    "site": "article",
+    "url": "https://www.cnbc.com/2026/09/14/sam-altman-ai-slowdown-anthropic-amodei-musk.html",
+    "capturedAt": "2026-09-15",
+    "title": "OpenAI boss Sam Altman spells out how and why the AI industry wants to slow down: 'We could lose control' ",
+    "publishedAt": "2026-09-14T08:59:18+0000",
+    "text": "OpenAI boss Sam Altman spells out how and why the AI industry wants to slow down: ‘We could lose control’\nOpenAI’s Sam Altman has said the company “welcomes” safety requirements for frontier AI labs.\nHe was among the artificial intelligence bosses who called over the weekend for the industry to slow the pace of AI development.\nThe warning made AI investors anxious in Monday’s trading and prompted a rebuke from U.S. President Donald Trump.\nOpenAI chief Sam Altman has made his most detailed comments yet on how artificial intelligence safety frameworks could work, after he joined Anthropic’s Dario Amodei and Elon Musk in calling for an industry slowdown over the weekend.\nIranian foreign minister will head to China for talks, as Pentagon reveals financial cost of war\nSafety concerns over the technology have hit fever pitch since an Anthropic researcher quit last week, warning that those building it believed that it could “kill us all by the end of the decade” and prompting other employees at the lab and rival OpenAI to warn of catastrophic risks.\nU.S. confirms for first time it has weapons deployed in space\nAI bosses have since shown a rare display of unity, with both Altman and Musk on Saturday backing an essay from Amodei that urged AI companies to slow how quickly they improve their most advanced models.\n10-year Treasury yield rises to highest since 2007 as Fed rate-hike expectations rise\nMitch McConnell returns to Senate after three-month health absence\nAI stocks were down Monday as investors digested the comments. U.S. President Donald Trump dismissed the CEOs’ warning on Sunday, saying a slowdown was not needed and would jeopardize America’s lead in AI over China.\nChina’s wealthy now face a new obstacle: Getting out\nSam Altman sets out 2 ways AI could go ‘very badly’\n“We welcome a federal framework that sets consistent safety requirements for frontier AI,” Altman said in a post on X just after midnight on Monday, adding that “no amount of American competitive pressure should justify recklessness.”",
+    "expect": {
+      "tickers": [
+        "OPENAI"
+      ]
+    },
+    "note": "OpenAI boss on the AI slowdown: OpenAI has pre-IPO tokens (PreStocks, Tessera) since 17 Sep 2026; was declined when only listed stocks existed"
+  },
+  {
+    "id": "wiki-oracle",
+    "site": "generic",
+    "url": "https://en.wikipedia.org/wiki/Oracle",
+    "capturedAt": "2026-09-15",
+    "title": "Oracle - Wikipedia",
+    "text": "Description\nConsulting the Oracle (1884) by John William Waterhouse, showing eight priestesses in a temple of prophecy\nThe word oracle comes from the Latin verb ōrāre, \"to speak\" and properly refers to the priest or priestess uttering the prediction. In extended use, oracle may also refer to the site of the oracle, and the oracular utterances themselves, are called khrēsmoí (χρησμοί) in Greek.\nAn oracle is a person or thing considered to provide insight, wise counsel or prophetic predictions, most notably including precognition of the future, inspired by deities. If done through occultic means, it is a form of divination.\nOracles were thought to be portals through which the gods spoke directly to people. In this sense, they were different from seers (manteis, μάντεις) who interpreted signs sent by the gods through bird signs, animal entrails, and other various methods.[1]\nOracle\nThe most important oracles of Greek antiquity were Pythia (priestess to Apollo at Delphi), and the oracle of Dione and Zeus at Dodona in Epirus. Other oracles of Apollo were located at Didyma and Mallus on the coast of Anatolia, at Corinth and Bassae in the Peloponnese, and at the islands of Delos and Aegina in the Aegean Sea.\nThe Sibylline Oracles are a collection of oracular utterances written in Greek hexameters, ascribed to the Sibyls, prophetesses who uttered divine revelations in frenzied states.\nOrigins\nWalter Burkert observes that \"Frenzied women from whose lips the God speaks\" are recorded in the Near East as in Mari in the second millennium BC and in Assyria in the first millennium BC.[2] In Egypt, the goddess Wadjet (eye of the moon) was depicted as a snake-headed woman or a woman with two snake-heads. Her oracle was in the renowned temple in Per-Wadjet (Greek name Buto). The oracle of Wadjet may have been the source for the oracular tradition which spread from Egypt to Greece.[3] Evans linked Wadjet with the \"Minoan Snake Goddess\".[4]\nAt the oracle of Dodona, she is called Diōnē (the feminine form of Diós, genitive of Zeus; or of dīos, \"godly\", literally \"heavenly\"), who represents the earth-fertile soil, probably the chief female goddess of the proto-Indo-European pantheon[citation needed]. Python, daughter (or son) of Gaia was the earth dragon of Delphi represented as a serpent and became the chthonic deity, enemy of Apollo, who slew her and possessed the oracle.[5]\nIn Greco-Roman culture\nPythia at Delphi\nWhen the Prytanies' seat shines white in the island of Siphnos, White-browed all the forum—need then of a true seer's wisdom— Danger will threat from a wooden boat, and a herald in scarlet.",
+    "expect": {
+      "none": true
+    },
+    "note": "declined: Oracle of Delphi, not the company"
+  },
+  {
+    "id": "wiki-circle",
+    "site": "generic",
+    "url": "https://en.wikipedia.org/wiki/Circle",
+    "capturedAt": "2026-09-15",
+    "title": "Circle - Wikipedia",
+    "text": "A circle is a shape consisting of all points in a plane that are at a given distance from a given point, the centre. The distance between any point of the circle and the centre is called the radius. The length of a line segment connecting two points on the circle and passing through the centre is called the diameter. A circle bounds a region of the plane called a disc.\nThe circle has been known since before the beginning of recorded history. Natural circles are common, such as the full moon or a slice of round fruit. The circle is the basis for the wheel, which, with related inventions such as gears, makes much of modern machinery possible. In mathematics, the study of the circle has helped inspire the development of geometry, astronomy and calculus.\nTerminology\nCircle\nAnnulus: a ring-shaped object, the region bounded by two concentric circles.\nArc: any connected part of a circle. Specifying two end points of an arc and a centre allows for two arcs that together make up a full circle.\nCentre: the point equidistant from all points on the circle.\nChord: a line segment whose endpoints lie on the circle, thus dividing a circle into two segments.\nCircumference: the length of one circuit along the circle, or the distance around the circle.\nChord, secant, tangent, radius, and diameter\nDiameter: a line segment whose endpoints lie on the circle and that passes through the centre; or the length of such a line segment. This is the largest distance between any two points on the circle. It is a special case of a chord, namely the longest chord for a given circle, and its length is twice the length of a radius.\nDisc: the region of the plane bounded by a circle. In strict mathematical usage, a circle is only the boundary of the disc (or disk), while in everyday use the term \"circle\" may also refer to a disc.\nLens: the region common to (the intersection of) two overlapping discs.\nRadius: a line segment joining the centre of a circle with any single point on the circle itself; or the length of such a segment, which is half (the length of) a diameter. Usually, the radius is denoted 𝑟 and required to be a positive number. A circle with 𝑟 = 0 is a degenerate case consisting of a single point.\nArc, sector, and segment\nSector: a region bounded by two radii of equal length with a common centre and either of the two possible arcs, determined by this centre and the endpoints of the radii.\nSegment: a region bounded by a chord and one of the arcs connecting the chord's endpoints. The length of the chord imposes a lower boundary on the diameter of possible arcs. Sometimes the term segment is used only for regions not containing the centre of the circle to which their arc belongs.\nSecant: an extended chord, a coplanar straight line, intersecting a circle in two points.\nSemicircle: one of the two possible arcs determined by the endpoints of a diameter, taking its midpoint as centre. In non-technical common usage it may mean the interior of the two-dimensional region bounded by a diameter and one of its arcs, that is technically called a half-disc. A half-disc is a special case of a segment, namely the largest one.",
+    "expect": {
+      "none": true
+    },
+    "note": "declined: the shape, not Circle Internet"
+  },
+  {
+    "id": "wiki-ford-crossing",
+    "site": "generic",
+    "url": "https://en.wikipedia.org/wiki/Ford_(crossing)",
+    "capturedAt": "2026-09-15",
+    "title": "Ford (crossing) - Wikipedia",
+    "text": "A ford is a shallow section of a river or stream where it may be crossed by wading, on horseback, or inside a vehicle.[1] A ford may occur naturally or be constructed. Fords may be impassable during high water. A low-water crossing is a low bridge that allows crossing over a river or stream when water is low but may be treated as a ford when the river is high and water covers the crossing.\nThe word ford is both a noun (describing the water crossing itself) and a verb (describing the act of crossing a ford).\nDescription\nFord (crossing)\nA ford is a much cheaper form of river crossing than a bridge, and it can transport much more weight than a bridge, but it may become impassable after heavy rain or during flood conditions. A ford is therefore normally only suitable for very minor roads (and for paths intended for walkers and horse riders etc.). Most modern fords are usually shallow enough to be crossed by cars and other wheeled or tracked vehicles (a process known as \"fording\"). Fords may be accompanied by stepping stones for pedestrians.\nThe United Kingdom has more than 2,000 fords, and most of them do not have any way of stopping vehicles from crossing when the water makes them impassable.[2] According to The AA, many flood-related vehicle breakdowns within the UK are at fords.[2]\nIn New Zealand, fords are a normal part of roads, including, until 2010, along State Highway 1 on the South Island's east coast.[3] In dry weather, drivers become aware of a ford by crunching across outwash detritus on the roadway. A Bailey bridge may be built off the mainline of the road to carry emergency traffic during high water.\nCrossing the Red River near Granite, Oklahoma in 1921\nAt places where the water is shallow enough, but the material on the riverbed will not support heavy vehicles, fords are sometimes improved by building a submerged concrete floor. In such cases, a curb (kerb) is often placed on the downstream side to prevent vehicles from slipping off, as the growth of algae will often make the slab very slippery. Fords may be also equipped with a post indicating the water depth, so that users may know if the water is too deep to attempt to cross. Some have an adjacent footbridge so that pedestrians may cross dryshod.\nCrossing the Milkhouse ford through Rock Creek, Washington, DC, in 1960\nFords were sometimes the only way to cross bodies of water, such as at the Milkhouse at Rock Creek in Washington DC. However, the regular use of this ford has been superseded by bridges.[4] The crossing remained open for \"adventurous\" drivers until 1996, when the National Park Service closed the ford to cars.[5]\nWatersplash\nA road running below the water level of a stream or river is often known as a \"watersplash\". It is a common name for a ford or stretch of wet road in some areas, and is sometimes also used to describe tidal crossings. They have become a common feature in rallying courses. Some enthusiasts seek out and drive through these water features, recording details (such as wave created, position, and access) on dedicated websites.[6]",
+    "expect": {
+      "none": true
+    },
+    "note": "declined: a river crossing, not Ford Motor"
+  },
+  {
+    "id": "recipe-apple-pie",
+    "site": "generic",
+    "url": "https://www.simplyrecipes.com/recipes/apple_pie/",
+    "capturedAt": "2026-09-15",
+    "title": "",
+    "text": "Page Not Found\nThe page you're looking for is unavailable. You might find what you're looking for by using our menu or search options.",
+    "expect": {
+      "none": true
+    },
+    "note": "declined: apple pie recipe"
+  },
+  {
+    "id": "x-nvda-cashtag",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000110866",
+    "capturedAt": "2026-09-15",
+    "title": "$NVDA breaking out again. Data center demand isn't slowing down, new ATH incoming 🚀",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "$NVDA breaking out again. Data center demand isn't slowing down, new ATH incoming 🚀",
+    "expect": {
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    "note": "demo step: cashtag, straight to the buy card",
+    "synthetic": true
+  },
+  {
+    "id": "x-ozempic-company",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000134623",
+    "capturedAt": "2026-09-15",
+    "title": "the Ozempic company just posted a monster quarter and the stock is somehow still down. wild.",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "the Ozempic company just posted a monster quarter and the stock is somehow still down. wild.",
+    "expect": {
+      "tickers": [
+        "NVO"
+      ]
+    },
+    "note": "demo step: product nickname, no ticker; ask or LLM resolves",
+    "synthetic": true
+  },
+  {
+    "id": "x-jensen-blackwell",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000142542",
+    "capturedAt": "2026-09-15",
+    "title": "Jensen just said Blackwell demand is off the charts for the next four quarters",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "Jensen just said Blackwell demand is off the charts for the next four quarters",
+    "expect": {
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    "note": "exec first name is not in the dictionary; product carries it",
+    "synthetic": true
+  },
+  {
+    "id": "x-musk-cybercab",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000118785",
+    "capturedAt": "2026-09-15",
+    "title": "Musk says Cybercab production starts in Q2. No steering wheel, no pedals.",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "Musk says Cybercab production starts in Q2. No steering wheel, no pedals.",
+    "expect": {
+      "tickers": [
+        "TSLA"
+      ]
+    },
+    "note": "exec surname + product",
+    "synthetic": true
+  },
+  {
+    "id": "x-meta-earnings",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000118785",
+    "capturedAt": "2026-09-15",
+    "title": "META earnings after the bell. Zuck needs a win here",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "META earnings after the bell. Zuck needs a win here",
+    "expect": {
+      "tickers": [
+        "META"
+      ]
+    },
+    "note": "bare ambiguous ticker with finance context",
+    "synthetic": true
+  },
+  {
+    "id": "x-lowercase-apple-shares",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000190056",
+    "capturedAt": "2026-09-15",
+    "title": "apple shares getting hammered premarket after that guidance cut",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "apple shares getting hammered premarket after that guidance cut",
+    "expect": {
+      "tickers": [
+        "AAPL"
+      ]
+    },
+    "note": "all-lowercase tweet: ambiguous name + finance context",
+    "synthetic": true
+  },
+  {
+    "id": "x-tsla-lookalike-token",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000174218",
+    "capturedAt": "2026-09-15",
+    "title": "TSLA coin on Solana is mooning, buy $TSLA before it's too late 🚀🚀",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "TSLA coin on Solana is mooning, buy $TSLA before it's too late 🚀🚀",
+    "expect": {
+      "tickers": [
+        "TSLA"
+      ]
+    },
+    "note": "lookalike token: resolve to the real company (spec §7.8 offers the real stock)",
+    "synthetic": true
+  },
+  {
+    "id": "x-apple-fruit",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000102947",
+    "capturedAt": "2026-09-15",
+    "title": "an apple a day keeps the doctor away 🍎 farmers market haul",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "an apple a day keeps the doctor away 🍎 farmers market haul",
+    "expect": {
+      "none": true
+    },
+    "note": "declined: the fruit",
+    "synthetic": true
+  },
+  {
+    "id": "x-circle-shape",
+    "site": "x",
+    "url": "https://x.com/glance_fixtures/status/1967000000000110866",
+    "capturedAt": "2026-09-15",
+    "title": "drew a perfect circle freehand today. peak performance",
+    "publishedAt": "2026-09-14T15:04:00.000Z",
+    "text": "drew a perfect circle freehand today. peak performance",
+    "expect": {
+      "none": true
+    },
+    "note": "declined: the shape",
+    "synthetic": true
+  }
+]

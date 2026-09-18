@@ -1,0 +1,2570 @@
+{
+  "address": "DP7QYPQZh2XqMREGWQ5MNo1vgGUSZbfAzJu3uRQATnmy",
+  "metadata": {
+    "name": "glance_vault",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Glance vault: policy-bound delegated stock buys on Solana"
+  },
+  "instructions": [
+    {
+      "name": "accept_admin",
+      "docs": [
+        "Two-step admin rotation, step 2: the proposed key proves control by signing."
+      ],
+      "discriminator": [
+        112,
+        42,
+        45,
+        90,
+        116,
+        181,
+        13,
+        170
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "new_admin",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "allow_mint",
+      "docs": [
+        "Curate one stock mint, with its issuer rule. Checked now as well as at every swap: a",
+        "mint that does not already carry the required delegate is refused."
+      ],
+      "discriminator": [
+        240,
+        28,
+        240,
+        70,
+        124,
+        240,
+        245,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "allowed_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  108,
+                  108,
+                  111,
+                  119,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "issuer_delegate",
+          "type": {
+            "option": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deposit",
+      "docs": [
+        "Anyone may deposit a stable mint into a vault (gifts, top-ups). Destination is fixed to the vault's ATA."
+      ],
+      "discriminator": [
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.owner",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "depositor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "depositor_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "depositor"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vault_ata",
+          "docs": [
+            "ATA address is deterministic and the ATA program fixes owner = vault, so init_if_needed cannot be poisoned."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "disallow_mint",
+      "docs": [
+        "Remove a mint from the catalog. Vaults keep what they hold and can still withdraw it;",
+        "the agent can no longer buy or sell it."
+      ],
+      "discriminator": [
+        75,
+        176,
+        193,
+        187,
+        34,
+        158,
+        118,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "allowed_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  108,
+                  108,
+                  111,
+                  119,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "allowed_mint.mint",
+                "account": "AllowedMint"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "execute_swap_desk",
+      "docs": [
+        "OTC fill: vault pays `amount_in` of the input mint to the desk, the desk pays",
+        "`amount_out` of the output mint into the vault's ATA. Both the agent and the",
+        "desk sign, so the price is agreed by two independent keys; the vault enforces",
+        "direction, curation, caps, and that its own account is the destination."
+      ],
+      "discriminator": [
+        156,
+        92,
+        57,
+        253,
+        21,
+        139,
+        91,
+        157
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.owner",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "agent",
+          "docs": [
+            "The delegated signer. Also pays rent for the vault's output ATA on first use."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "desk",
+          "docs": [
+            "The config-approved counterparty. Must co-sign: it is giving up tokens."
+          ],
+          "signer": true
+        },
+        {
+          "name": "input_mint"
+        },
+        {
+          "name": "output_mint"
+        },
+        {
+          "name": "allowed_mint",
+          "docs": [
+            "The stock side's AllowedMint (the output on a buy, the input on a sell); checked in the handler."
+          ]
+        },
+        {
+          "name": "vault_in",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "input_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "input_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vault_out",
+          "docs": [
+            "Destination is structurally the vault's own ATA (spec §8.3 check 4)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "output_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "output_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "desk_in",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "desk"
+              },
+              {
+                "kind": "account",
+                "path": "input_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "input_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "desk_out",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "desk"
+              },
+              {
+                "kind": "account",
+                "path": "output_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "output_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "input_token_program"
+        },
+        {
+          "name": "output_token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_in",
+          "type": "u64"
+        },
+        {
+          "name": "amount_out",
+          "type": "u64"
+        },
+        {
+          "name": "min_out",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "execute_swap_router",
+      "docs": [
+        "Router fill (Jupiter on mainnet). `route_data` is the router instruction data built",
+        "off-chain; `remaining_accounts` are the router's accounts in order. The vault PDA is",
+        "the only signer we extend into the CPI; every other remaining account must be a",
+        "non-signer, and no vault-owned token account other than vault_in/vault_out may be",
+        "handed to the router."
+      ],
+      "discriminator": [
+        8,
+        38,
+        105,
+        233,
+        162,
+        61,
+        2,
+        254
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.owner",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "agent",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "input_mint"
+        },
+        {
+          "name": "output_mint"
+        },
+        {
+          "name": "allowed_mint",
+          "docs": [
+            "The stock side's AllowedMint; checked in the handler."
+          ]
+        },
+        {
+          "name": "vault_in",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "input_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "input_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vault_out",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "output_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "output_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "router_program"
+        },
+        {
+          "name": "input_token_program"
+        },
+        {
+          "name": "output_token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_in",
+          "type": "u64"
+        },
+        {
+          "name": "min_out",
+          "type": "u64"
+        },
+        {
+          "name": "route_data",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "init_config",
+      "docs": [
+        "One-time config creation. Only the program's upgrade authority may call it, which",
+        "closes the classic \"anyone initializes the global config first\" race after deploy."
+      ],
+      "discriminator": [
+        23,
+        235,
+        115,
+        232,
+        168,
+        96,
+        1,
+        231
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "program",
+          "docs": [
+            "Anti-frontrun: only the upgrade authority may create the config."
+          ],
+          "address": "DP7QYPQZh2XqMREGWQ5MNo1vgGUSZbfAzJu3uRQATnmy"
+        },
+        {
+          "name": "program_data"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "ConfigParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize_vault",
+      "docs": [
+        "Onboarding in one signature (spec §7.2): create the vault, set policy + agent,",
+        "create the vault's stable-mint ATA and deposit the initial amount."
+      ],
+      "discriminator": [
+        48,
+        191,
+        163,
+        44,
+        71,
+        129,
+        63,
+        164
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stable_mint"
+        },
+        {
+          "name": "owner_stable_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "stable_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "stable_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vault_stable_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "stable_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "stable_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "stable_token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "PolicyParams"
+            }
+          }
+        },
+        {
+          "name": "deposit_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "pause",
+      "docs": [
+        "Instant and unconditional (spec §8.2)."
+      ],
+      "discriminator": [
+        211,
+        22,
+        221,
+        251,
+        74,
+        121,
+        193,
+        47
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "propose_admin",
+      "docs": [
+        "Two-step admin rotation, step 1."
+      ],
+      "discriminator": [
+        121,
+        214,
+        199,
+        212,
+        87,
+        39,
+        117,
+        234
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_admin",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "revoke_agent",
+      "discriminator": [
+        227,
+        60,
+        209,
+        125,
+        240,
+        117,
+        163,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "set_policy",
+      "discriminator": [
+        40,
+        133,
+        12,
+        157,
+        235,
+        202,
+        2,
+        132
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "PolicyParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "unpause",
+      "discriminator": [
+        169,
+        144,
+        4,
+        38,
+        10,
+        141,
+        188,
+        255
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_config",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "ConfigParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "docs": [
+        "Owner withdraws any token the vault holds, to the owner's own ATA. No timelock: Glance never gates access to funds."
+      ],
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "vault_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "owner_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AllowedMint",
+      "discriminator": [
+        173,
+        229,
+        179,
+        46,
+        121,
+        164,
+        247,
+        6
+      ]
+    },
+    {
+      "name": "Config",
+      "discriminator": [
+        155,
+        12,
+        170,
+        224,
+        30,
+        250,
+        204,
+        130
+      ]
+    },
+    {
+      "name": "Vault",
+      "discriminator": [
+        211,
+        8,
+        232,
+        43,
+        2,
+        152,
+        117,
+        119
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ConfigUpdated",
+      "discriminator": [
+        40,
+        241,
+        230,
+        122,
+        11,
+        19,
+        198,
+        194
+      ]
+    },
+    {
+      "name": "Deposited",
+      "discriminator": [
+        111,
+        141,
+        26,
+        45,
+        161,
+        35,
+        100,
+        57
+      ]
+    },
+    {
+      "name": "MintAllowed",
+      "discriminator": [
+        80,
+        212,
+        130,
+        120,
+        125,
+        216,
+        111,
+        240
+      ]
+    },
+    {
+      "name": "MintDisallowed",
+      "discriminator": [
+        197,
+        121,
+        232,
+        50,
+        39,
+        80,
+        141,
+        148
+      ]
+    },
+    {
+      "name": "PauseChanged",
+      "discriminator": [
+        238,
+        188,
+        213,
+        78,
+        134,
+        209,
+        178,
+        218
+      ]
+    },
+    {
+      "name": "PolicyUpdated",
+      "discriminator": [
+        225,
+        112,
+        112,
+        67,
+        95,
+        236,
+        245,
+        161
+      ]
+    },
+    {
+      "name": "SwapExecuted",
+      "discriminator": [
+        150,
+        166,
+        26,
+        225,
+        28,
+        89,
+        38,
+        79
+      ]
+    },
+    {
+      "name": "VaultInitialized",
+      "discriminator": [
+        180,
+        43,
+        207,
+        2,
+        18,
+        71,
+        3,
+        75
+      ]
+    },
+    {
+      "name": "Withdrawn",
+      "discriminator": [
+        20,
+        89,
+        223,
+        198,
+        194,
+        124,
+        219,
+        13
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "NotUpgradeAuthority",
+      "msg": "Only the program upgrade authority may create the config"
+    },
+    {
+      "code": 6001,
+      "name": "NotAdmin",
+      "msg": "Signer is not the config admin"
+    },
+    {
+      "code": 6002,
+      "name": "NotPendingAdmin",
+      "msg": "Signer is not the pending admin"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidAdmin",
+      "msg": "Invalid admin key"
+    },
+    {
+      "code": 6004,
+      "name": "ListTooLong",
+      "msg": "List exceeds its maximum length"
+    },
+    {
+      "code": 6005,
+      "name": "MintInBothLists",
+      "msg": "A mint cannot be both stable and a stock"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidTtl",
+      "msg": "Agent TTL out of range"
+    },
+    {
+      "code": 6007,
+      "name": "NotOwner",
+      "msg": "Signer is not the vault owner"
+    },
+    {
+      "code": 6008,
+      "name": "ZeroAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6009,
+      "name": "PerTxCapAboveDaily",
+      "msg": "Per-transaction cap cannot exceed the daily cap"
+    },
+    {
+      "code": 6010,
+      "name": "SlippageTooHigh",
+      "msg": "Max slippage above 10%"
+    },
+    {
+      "code": 6011,
+      "name": "ExpiryInPast",
+      "msg": "Agent expiry is in the past"
+    },
+    {
+      "code": 6012,
+      "name": "ExpiryTooFar",
+      "msg": "Agent expiry is further out than the config allows"
+    },
+    {
+      "code": 6013,
+      "name": "AgentIsOwner",
+      "msg": "Agent cannot be the vault owner"
+    },
+    {
+      "code": 6014,
+      "name": "VaultPaused",
+      "msg": "Vault is paused"
+    },
+    {
+      "code": 6015,
+      "name": "NoAgent",
+      "msg": "Vault has no agent"
+    },
+    {
+      "code": 6016,
+      "name": "NotAgent",
+      "msg": "Signer is not the vault's agent"
+    },
+    {
+      "code": 6017,
+      "name": "AgentExpired",
+      "msg": "Agent authorization has expired"
+    },
+    {
+      "code": 6018,
+      "name": "SameMint",
+      "msg": "Input and output mints must differ"
+    },
+    {
+      "code": 6019,
+      "name": "InputMintNotStable",
+      "msg": "Input mint is not an approved stable mint"
+    },
+    {
+      "code": 6020,
+      "name": "OutputMintNotAllowed",
+      "msg": "Output mint is not a curated stock"
+    },
+    {
+      "code": 6021,
+      "name": "OutputMintNotIssuer",
+      "msg": "Output mint does not carry a recognised issuer authority"
+    },
+    {
+      "code": 6022,
+      "name": "BadMint",
+      "msg": "Mint account could not be parsed"
+    },
+    {
+      "code": 6023,
+      "name": "OverPerTxCap",
+      "msg": "Amount exceeds the per-transaction cap"
+    },
+    {
+      "code": 6024,
+      "name": "OverDailyCap",
+      "msg": "Amount exceeds the daily cap"
+    },
+    {
+      "code": 6025,
+      "name": "InputDebitMismatch",
+      "msg": "Vault input balance did not decrease by exactly amount_in"
+    },
+    {
+      "code": 6026,
+      "name": "OutputBelowMin",
+      "msg": "Output received is below the minimum"
+    },
+    {
+      "code": 6027,
+      "name": "DeskDisabled",
+      "msg": "Desk fills are disabled"
+    },
+    {
+      "code": 6028,
+      "name": "UnknownDesk",
+      "msg": "Desk is not the config-approved desk"
+    },
+    {
+      "code": 6029,
+      "name": "RouterDisabled",
+      "msg": "Router fills are disabled"
+    },
+    {
+      "code": 6030,
+      "name": "UnknownRouter",
+      "msg": "Router is not the config-approved router"
+    },
+    {
+      "code": 6031,
+      "name": "RouteDataTooLarge",
+      "msg": "Route data too large"
+    },
+    {
+      "code": 6032,
+      "name": "UnexpectedSigner",
+      "msg": "A remaining account is a signer that is not the vault"
+    },
+    {
+      "code": 6033,
+      "name": "UnexpectedAccount",
+      "msg": "A remaining account must not be passed to the router"
+    },
+    {
+      "code": 6034,
+      "name": "AgentLamportsDecreased",
+      "msg": "Agent lamports decreased during the router call"
+    },
+    {
+      "code": 6035,
+      "name": "MathOverflow",
+      "msg": "Arithmetic overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "AllowedMint",
+      "docs": [
+        "One curated stock mint and its issuer rule, at [\"allowed\", mint]."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer_delegate",
+            "docs": [
+              "The Token-2022 PermanentDelegate the mint must carry, or None when admin curation is the only gate."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Config",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "pending_admin",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "desk",
+            "docs": [
+              "OTC counterparty for `execute_swap_desk`. Pubkey::default() disables the desk path."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "router_program",
+            "docs": [
+              "Router for `execute_swap_router` (Jupiter on mainnet). Pubkey::default() disables it."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "stable_mints",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "issuer_authorities",
+            "docs": [
+              "Legacy (v1): no longer read by swaps, which use each mint's AllowedMint issuer rule.",
+              "Kept so the deployed Config account keeps its layout."
+            ],
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "allowed_mints",
+            "docs": [
+              "Legacy (v1): no longer read by swaps, which require the mint's AllowedMint account.",
+              "Kept so the deployed Config account keeps its layout."
+            ],
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "max_agent_ttl_secs",
+            "docs": [
+              "Upper bound on `agent_expires_at - now` (seconds)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "desk",
+            "type": "pubkey"
+          },
+          {
+            "name": "router_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "stable_mints",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "issuer_authorities",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "allowed_mints",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "max_agent_ttl_secs",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "desk",
+            "type": "pubkey"
+          },
+          {
+            "name": "router_program",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Deposited",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "depositor",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintAllowed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer_delegate",
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintDisallowed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PauseChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PolicyParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent_expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "per_tx_cap",
+            "type": "u64"
+          },
+          {
+            "name": "daily_cap",
+            "type": "u64"
+          },
+          {
+            "name": "max_slippage_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PolicyUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent_expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "per_tx_cap",
+            "type": "u64"
+          },
+          {
+            "name": "daily_cap",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SwapExecuted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "side",
+            "type": "u8"
+          },
+          {
+            "name": "in_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "out_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount_in",
+            "type": "u64"
+          },
+          {
+            "name": "amount_out",
+            "type": "u64"
+          },
+          {
+            "name": "fill",
+            "type": "u8"
+          },
+          {
+            "name": "ts",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent_expires_at",
+            "docs": [
+              "unix seconds; 0 when no agent"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "per_tx_cap",
+            "docs": [
+              "stable base units (USDC: 6 dp)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "daily_cap",
+            "type": "u64"
+          },
+          {
+            "name": "daily_spent",
+            "type": "u64"
+          },
+          {
+            "name": "daily_window_start",
+            "docs": [
+              "unix seconds; rolling window start"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "max_slippage_bps",
+            "type": "u16"
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent_expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "deposit_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Withdrawn",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

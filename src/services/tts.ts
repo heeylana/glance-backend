@@ -1,0 +1,61 @@
+/**
+ * Voice out (spec §7.1): the bubble's spoken line, synthesized by Fish Audio with the "Ethan" voice
+ * and streamed back to the extension as MP3. The lines repeat a lot ("Glance is paused."), so a
+ * small in-memory cache keyed by the text keeps the common ones instant. Without a key this returns
+ * null and the extension falls back to the browser's own voice.
+ */
+import { createHash } from "node:crypto";
+import { env } from "../config.js";
+import { log } from "../lib/log.js";
+
+export const TTS_MAX_CHARS = 400;
+const FISH_TTS = "https://api.fish.audio/v1/tts";
+const CACHE_MAX = 200;
+const cache = new Map<string, { bytes: Buffer; mime: string }>();
+
+/** Collapse whitespace, soften the em dash the copy uses, and cap the length. */
+export function normalizeSpeech(text: string): string {
+  return text.replace(/\s*[—–]\s*/g, ", ").replace(/\s+/g, " ").trim().slice(0, TTS_MAX_CHARS);
+}
+
+export function ttsKey(text: string): string {
+  return createHash("sha256").update(`${env.FISH_AUDIO_VOICE_ID}|${env.FISH_AUDIO_MODEL}|${normalizeSpeech(text).toLowerCase()}`).digest("hex");
+}
+
+export function ttsEnabled(): boolean {
+  return !!env.FISH_AUDIO_API_KEY;
+}
+
+export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: string; cached: boolean } | null> {
+  if (!env.FISH_AUDIO_API_KEY) return null;
+  const line = normalizeSpeech(text);
+  if (!line) return null;
+  const key = ttsKey(line);
+  const hit = cache.get(key);
+  if (hit) {
+    cache.delete(key);
+    cache.set(key, hit); // most recently used last
+    return { ...hit, cached: true };
+  }
+  try {
+    const res = await fetch(FISH_TTS, {
+      method: "POST",
+      headers: { authorization: `Bearer ${env.FISH_AUDIO_API_KEY}`, "content-type": "application/json", model: env.FISH_AUDIO_MODEL },
+      body: JSON.stringify({ text: line, reference_id: env.FISH_AUDIO_VOICE_ID, format: "mp3", mp3_bitrate: 64, latency: "balanced" }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) {
+      log.warn("tts failed", { status: res.status, body: (await res.text().catch(() => "")).slice(0, 200) });
+      return null;
+    }
+    const bytes = Buffer.from(await res.arrayBuffer());
+    const mime = res.headers.get("content-type")?.split(";")[0] || "audio/mpeg";
+    if (bytes.length === 0) return null;
+    cache.set(key, { bytes, mime });
+    if (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value!);
+    return { bytes, mime, cached: false };
+  } catch (e) {
+    log.warn("tts failed", { err: String(e) });
+    return null;
+  }
+}
