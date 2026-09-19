@@ -6,7 +6,7 @@ import { env } from "./config.js";
 import { GuardError, GuardCode, userMessage } from "./lib/errors.js";
 import { log } from "./lib/log.js";
 import { loadRegistry } from "./config/issuers.js";
-import { agentKeypair } from "./services/keys.js";
+import { agentKeypair, deskKeypair } from "./services/keys.js";
 import { authPrivateRoutes, authPublicRoutes } from "./routes/auth.js";
 import { routeProvider } from "./services/route.js";
 import { sampleAllPrices } from "./services/prices.js";
@@ -90,6 +90,21 @@ app.route("/", explainRoutes);
 app.route("/", rememberRoutes);
 
 function checkConfig() {
+  // Without its agent key the backend can't trade, and a new key would orphan every vault that names the
+  // old one, so refuse to start instead (services/keys.ts). The error names the variable, never the key.
+  try {
+    agentKeypair();
+  } catch (e) {
+    log.error("no agent key: refusing to start", { err: (e as Error).message, fix: "set AGENT_KEYPAIR to the key file's path or its contents (doc/how-to-deploy.md 5.3)" });
+    process.exit(1);
+  }
+  if (routeProvider().name === "desk") {
+    try {
+      deskKeypair();
+    } catch (e) {
+      log.error("no desk key: every devnet buy and sell will fail", { err: (e as Error).message });
+    }
+  }
   const reg = loadRegistry();
   if (!reg.stableMints.includes(env.USDC_MINT)) {
     log.error("USDC_MINT is not in the issuer registry's stable mints; buys will be rejected as INPUT_MINT_NOT_STABLE", {

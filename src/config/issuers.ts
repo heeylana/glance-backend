@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { z } from "zod";
@@ -95,7 +95,15 @@ const here = dirname(fileURLToPath(import.meta.url));
 export const CATALOG_FILE = join(here, "catalog.json");
 
 export function registryPath(mode = env.ISSUER_MODE): string {
-  return join(here, mode === "mock" ? "issuers.mock.json" : "issuers.mainnet.json");
+  const bundled = join(here, mode === "mock" ? "issuers.mock.json" : "issuers.mainnet.json");
+  const file = mode === "mock" ? env.ISSUER_REGISTRY_FILE : undefined;
+  if (!file) return bundled;
+  // A fresh volume starts from the registry shipped with the code, then keeps the mocks made on it.
+  if (!existsSync(file)) {
+    mkdirSync(dirname(file), { recursive: true });
+    copyFileSync(bundled, file);
+  }
+  return file;
 }
 
 /** Issuers people trade most first on a company's card; within one, by symbol. */

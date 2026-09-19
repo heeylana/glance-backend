@@ -17,9 +17,18 @@ const Env = z.object({
 
   /** Anchor program id of the vault. */
   VAULT_PROGRAM_ID: z.string().default("DP7QYPQZh2XqMREGWQ5MNo1vgGUSZbfAzJu3uRQATnmy"),
+  // Every *_KEYPAIR (and PAYER_KEYPAIR) is a path to a Solana key file, or that file's contents (the JSON
+  // array), so hosts without a disk can keep keys in sealed variables (services/keys.ts).
   /** The delegated signer. Its only capability is execute_swap_* inside each user's on-chain policy. */
   AGENT_KEYPAIR: z.string().default("./.keys/agent.json"),
   DESK_KEYPAIR: z.string().default("./.keys/desk.json"),
+  /** The devnet mock issuer, which mints mock stocks on first buy. */
+  ISSUER_KEYPAIR: z.string().default("./.keys/issuer-authority.json"),
+  /**
+   * Where the devnet mock registry is kept, when not in src/config (the backend adds a mock mint to it on a
+   * stock's first buy). Point it at a volume on hosts that reset files on deploy; it starts as a copy of the bundled file.
+   */
+  ISSUER_REGISTRY_FILE: z.string().optional(),
   /** HS256 secret for session JWTs issued after a wallet signature. */
   SESSION_SECRET: z.string().default("dev-only-change-me-dev-only-change-me"),
   /** Origin of the Phantom-facing web console (sign-in, create account, deposit, withdraw, pause). */

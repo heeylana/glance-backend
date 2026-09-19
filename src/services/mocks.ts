@@ -26,7 +26,7 @@ import { recordMock, tradableFor, type MintEntry } from "../config/issuers.js";
 import { connection } from "../lib/solana.js";
 import { log } from "../lib/log.js";
 import { GuardCode, GuardError } from "../lib/errors.js";
-import { deskKeypair, loadKeypair, payerKeypair } from "./keys.js";
+import { deskKeypair, issuerKeypair, payerKeypair } from "./keys.js";
 import { ensureAllowed } from "./curation.js";
 
 const DESK_INVENTORY_TOKENS = 10_000n;
@@ -67,7 +67,7 @@ export function ensureTradable(listing: MintEntry): Promise<MintEntry> {
   const job = (async () => {
     const t0 = Date.now();
     const payer = payerKeypair();
-    const issuer = loadKeypair(".keys/issuer-authority.json");
+    const issuer = issuerKeypair();
     const desk = deskKeypair();
     const withDelegate = listing.issuerDelegate !== null;
     const mint = await createMockStockMint({ payer, issuer, decimals: listing.decimals, name: `${listing.name} (mock)`, symbol: listing.symbol, withDelegate });
