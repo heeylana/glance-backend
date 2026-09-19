@@ -4,24 +4,27 @@
  * which is the baseline column at no cost.
  *
  *   pnpm script:replay-explain --tokens                                  # free: where each capture's input tokens go
- *   pnpm script:replay-explain --configs sonnet,sonnet+full,sonnet+nothink,sonnet:medium --out report.html
+ *   pnpm script:replay-explain --configs sonnet,sonnet+pipes+nolean,sonnet+nothink,sonnet:medium --out report.html
  *   pnpm script:replay-explain --configs opus --only birdeye --out report.html
  *
- * A config is `<model>[:<effort>][+full][+nothink]`: model sonnet | opus | haiku | a full id; effort low |
- * medium | high (default low); +full sends the uncut element map instead of production's `compactElements`;
- * +nothink turns thinking off (LLM_VISION_THINKING=off) to see what it saves in output tokens and costs in answers.
- * Captures from before 19 Sep 2026 were answered with the full map. The report draws every answer's
- * marks on the capture's screenshot; judge them by eye. It embeds the screenshots, so keep it local.
+ * A config is `<model>[:<effort>][+full][+nothink][+pipes][+nolean]`: model sonnet | opus | haiku | a full id;
+ * effort low | medium | high (default low); +full sends the uncut element map instead of production's
+ * `compactElements`; +nothink turns thinking off (LLM_VISION_THINKING=off); +pipes writes the map with " | "
+ * instead of spaces; +nolean keeps the page furniture `leanElements` drops. `sonnet+pipes+nolean` is the
+ * production request before 19 Sep 2026. Each shows what it saves in tokens and what it costs in answers.
+ * Captures from before 18 Sep 2026 were answered with the full map, and before 19 Sep with pipes and no
+ * lean map. The report draws every answer's marks on the capture's screenshot; judge them by eye. It embeds
+ * the screenshots, so keep it local.
  */
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { env } from "../config.js";
-import { compactElements, ExplainInputSchema, explainRequest, sanitizeExplanation, type ExplainParsed as ExplainInput } from "../services/explain.js";
+import { compactElements, ExplainInputSchema, explainRequest, newsContext, sanitizeExplanation, type ExplainParsed as ExplainInput } from "../services/explain.js";
 import { explainPage, explainPrompt, lastUsage, type Explanation, type Mark } from "../services/llm.js";
 
 type Capture = { file: string; capturedAt: string; input: ExplainInput; answer: (Explanation & { skills?: string[] }) | null };
-type Config = { label: string; model: string; effort: "low" | "medium" | "high"; full: boolean; nothink: boolean };
+type Config = { label: string; model: string; effort: "low" | "medium" | "high"; full: boolean; nothink: boolean; pipes: boolean; nolean: boolean };
 type Run = { config: string; answer: Explanation | null; ms: number | null; usd: number | null; proposed: number; kept: number; tokens: string };
 
 const MODELS: Record<string, string> = { sonnet: "claude-sonnet-5", opus: "claude-opus-5", haiku: "claude-haiku-4-5" };
@@ -41,10 +44,10 @@ function parseArgs(argv: string[]) {
 }
 
 function parseConfig(label: string): Config {
-  const m = /^([a-z0-9.-]+)(?::(low|medium|high))?((?:\+(?:full|nothink))*)$/.exec(label);
-  if (!m) throw new Error(`bad config "${label}": use <model>[:<effort>][+full][+nothink]`);
+  const m = /^([a-z0-9.-]+)(?::(low|medium|high))?((?:\+(?:full|nothink|pipes|nolean))*)$/.exec(label);
+  if (!m) throw new Error(`bad config "${label}": use <model>[:<effort>][+full][+nothink][+pipes][+nolean]`);
   const flags = m[3]!.split("+").filter(Boolean);
-  return { label, model: MODELS[m[1]!] ?? m[1]!, effort: (m[2] as Config["effort"]) ?? "low", full: flags.includes("full"), nothink: flags.includes("nothink") };
+  return { label, model: MODELS[m[1]!] ?? m[1]!, effort: (m[2] as Config["effort"]) ?? "low", full: flags.includes("full"), nothink: flags.includes("nothink"), pipes: flags.includes("pipes"), nolean: flags.includes("nolean") };
 }
 
 function loadCaptures(dir: string, only: string): Capture[] {
@@ -62,22 +65,35 @@ const countMarks = (a: Explanation | null) => a?.segments.reduce((n, s) => n + s
 async function tokens(captures: Capture[]) {
   const c = env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }) : new Anthropic();
   const model = env.LLM_VISION_MODEL ?? env.LLM_MODEL;
-  const count = async (input: ExplainInput, fullMap = true) => {
-    const { args } = explainRequest(input, { fullMap });
+  const count = async (input: ExplainInput, opts: { fullMap?: boolean; mapFormat?: "pipes" | "spaces"; lean?: boolean; news?: string } = {}) => {
+    const { args } = explainRequest(input, opts);
+    args.news = opts.news ?? "";
     const p = explainPrompt(args);
     return (await c.messages.countTokens({ model, system: p.system, messages: p.messages })).input_tokens;
   };
-  console.log(`Input tokens on ${model}, full map (the answer schema, ~3,000 cached tokens, is not counted by this endpoint)\n`);
+  console.log(`Input tokens on ${model} per capture, production request (the answer schema, ~3,000 cached tokens, is not counted by this endpoint)\n`);
+  const sum = { total: 0, image: 0, map: 0, cached: 0, news: 0, pipesExtra: 0, noleanExtra: 0, oldExtra: 0, fullExtra: 0 };
   for (const cap of captures) {
-    const full = await count(cap.input);
-    const noImage = await count({ ...cap.input, image: undefined });
-    const noMap = await count({ ...cap.input, elements: [] });
-    const compact = await count(cap.input, false);
+    const news = await newsContext(cap.input);
+    const total = await count(cap.input, { news });
+    const noImage = await count({ ...cap.input, image: undefined }, { news });
+    const noMap = await count({ ...cap.input, elements: [] }, { news });
+    const noNews = news ? await count(cap.input) : total;
+    const pipes = await count(cap.input, { news, mapFormat: "pipes" });
+    const nolean = await count(cap.input, { news, lean: false });
+    const old = await count(cap.input, { news, mapFormat: "pipes", lean: false });
+    const full = await count(cap.input, { news, fullMap: true, mapFormat: "pipes" });
     const { args } = explainRequest(cap.input);
-    const system = await c.messages.countTokens({ model, system: explainPrompt(args).system, messages: [{ role: "user", content: "x" }] });
-    console.log(`${cap.file}\n  total ${full} · screenshot ${full - noImage} · element map ${full - noMap} (${cap.input.elements.length} elements) · instructions + skills ${system.input_tokens} (cached)`);
-    console.log(`  production map (compactElements): ${compactElements(cap.input).length} elements, ${full - compact} tokens fewer (${Math.round(((full - compact) / full) * 100)}% of the input)\n`);
+    const cached = (await c.messages.countTokens({ model, system: explainPrompt(args).system, messages: [{ role: "user", content: "x" }] })).input_tokens;
+    const row = { total, image: total - noImage, map: total - noMap, cached, news: total - noNews, pipesExtra: pipes - total, noleanExtra: nolean - total, oldExtra: old - total, fullExtra: full - total };
+    for (const k of Object.keys(sum) as (keyof typeof sum)[]) sum[k] += row[k];
+    console.log(`${cap.file.slice(0, 32)} ${String(total).padStart(5)} in · image ${row.image} · map ${row.map} (${compactElements(cap.input, { lean: true }).length}/${cap.input.elements.length} elements) · news ${row.news} · skills+instructions ${cached} cached · pipes +${row.pipesExtra} · no lean +${row.noleanExtra} · before 19 Sep +${row.oldExtra}`);
   }
+  const n = captures.length;
+  const avg = (k: keyof typeof sum) => Math.round(sum[k] / n);
+  const pct = (k: keyof typeof sum) => Math.round((sum[k] / sum.total) * 100);
+  console.log(`\nAverage over ${n}: ${avg("total")} input tokens · image ${avg("image")} · element map ${avg("map")} (${pct("map")}%) · news ${avg("news")} · instructions+skills ${avg("cached")} (cached)`);
+  console.log(`Against production: pipes would add ${avg("pipesExtra")} (${pct("pipesExtra")}%), no lean map ${avg("noleanExtra")} (${pct("noleanExtra")}%), both (the request before 19 Sep) ${avg("oldExtra")} (${pct("oldExtra")}%), the uncut map ${avg("fullExtra")}.`);
 }
 
 async function replay(captures: Capture[], configs: Config[]): Promise<Map<string, Run[]>> {
@@ -91,7 +107,9 @@ async function replay(captures: Capture[], configs: Config[]): Promise<Map<strin
       const input = cap.input;
       const before = lastUsage("explainPage");
       const t0 = Date.now();
-      const raw = await explainPage(explainRequest(input, { fullMap: cfg.full }).args);
+      const { args } = explainRequest(input, { fullMap: cfg.full, mapFormat: cfg.pipes ? "pipes" : "spaces", lean: !cfg.nolean });
+      args.news = await newsContext(input);
+      const raw = await explainPage(args);
       const ms = Date.now() - t0;
       const u = lastUsage("explainPage");
       const fresh = u && u !== before ? u : null;
@@ -166,7 +184,7 @@ function report(captures: Capture[], results: Map<string, Run[]>, configs: Confi
     const ms = ok.length ? Math.round(ok.reduce((n, r) => n + (r.ms ?? 0), 0) / ok.length) : 0;
     const proposed = runs.reduce((n, r) => n + r.proposed, 0);
     const kept = runs.reduce((n, r) => n + r.kept, 0);
-    return `<tr><td>${esc(cfg.label)}</td><td>${cfg.model} · ${cfg.effort}${cfg.full ? " · full map" : ""}${cfg.nothink ? " · thinking off" : ""}</td><td>${ok.length}/${runs.length}</td><td>$${(usd / Math.max(1, runs.length)).toFixed(4)}</td><td>${ms} ms</td><td>${kept}/${proposed}</td></tr>`;
+    return `<tr><td>${esc(cfg.label)}</td><td>${cfg.model} · ${cfg.effort}${cfg.full ? " · full map" : ""}${cfg.nothink ? " · thinking off" : ""}${cfg.pipes ? " · map with pipes" : ""}${cfg.nolean ? " · no lean map" : ""}</td><td>${ok.length}/${runs.length}</td><td>$${(usd / Math.max(1, runs.length)).toFixed(4)}</td><td>${ms} ms</td><td>${kept}/${proposed}</td></tr>`;
   });
   const sections = captures.map((cap) => {
     const runs = results.get(cap.file)!;

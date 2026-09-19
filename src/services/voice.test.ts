@@ -75,6 +75,20 @@ describe("parseCommand", () => {
     expect(say("set it to twenty")).toMatchObject({ kind: "amount", amountUsd: 20 });
   });
 
+  it("treats what's happening on the page as a page question, and about the stock as why", () => {
+    for (const t of ["what's happening on this page", "what's going on here", "what's going on in this chart", "what happened in this article"]) expect(say(t, closed)?.kind, t).toBe("explain");
+    for (const t of ["what's going on with Nvidia today", "why is it down", "what happened today"]) expect(say(t)?.kind, t).toBe("why");
+  });
+
+  it("sends pointing at something on the page to explain, and glances a named company", () => {
+    for (const t of ["point me to Anthropic", "point me to where Anthropic is", "can you point to Anthropic so I can glance at it", "highlight Microsoft", "locate the earnings table", "circle the price"])
+      expect(say(t, closed)?.kind, t).toBe("explain");
+    expect(say("glance Anthropic", closed)).toMatchObject({ kind: "glance", companyId: "anthropic" });
+    expect(say("glance at Nvidia", closed)).toMatchObject({ kind: "glance", companyId: "nvda" });
+    expect(say("glance this", closed)).toMatchObject({ kind: "glance", companyId: null });
+    expect(sanitize({ kind: "glance", amountUsd: null, companyId: "anthropic", note: null, direction: null, all: null }, closed)).toMatchObject({ kind: "glance", companyId: "anthropic" });
+  });
+
   it("remembers a page, and leaves notes about a purchase to note", () => {
     for (const t of ["Remember this", "remember this page", "Hey Glance, remember this article.", "save this for later", "keep this in mind", "bookmark this page", "please remember it", "hold on to this story"])
       expect(say(t)?.kind, t).toBe("remember");

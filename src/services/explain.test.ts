@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compactElements, earlierSteps, elementMap, memoryBlock, OFFSCREEN_KEPT, quoteFits, sanitizeAction, sanitizeChart, sanitizeExplanation, type ExplainInput } from "./explain.js";
+import { compactElements, earlierSteps, elementMap, explainCompanies, ExplainInputSchema, explainRequest, leanElements, memoryBlock, newsBlock, OFFSCREEN_KEPT, questionTerms, quoteFits, sanitizeAction, sanitizeChart, sanitizeExplanation, type ExplainInput } from "./explain.js";
 import type { Mark } from "./llm.js";
 
 const input: Pick<ExplainInput, "size" | "elements" | "stepsLeft"> = {
@@ -77,6 +77,7 @@ describe("sanitizeExplanation", () => {
 describe("elementMap", () => {
   it("writes one line per element", () => {
     expect(elementMap(input.elements.slice(0, 2))).toBe("e1 | heading | 40,80,900,48 | Nvidia shares jump 4% after Blackwell demand\ne2 | canvas | 40,200,800,400 | ");
+    expect(elementMap(input.elements.slice(0, 1), "spaces")).toBe("e1 heading 40,80,900,48 Nvidia shares jump 4% after Blackwell demand");
   });
 });
 
@@ -183,5 +184,80 @@ describe("compactElements", () => {
     const out = compactElements({ size: { w: 1280, h: 800 }, elements: [...visible, ...below] });
     expect(out).toHaveLength(5 + OFFSCREEN_KEPT);
     expect(out.at(-1)!.id).toBe(`e${100 + OFFSCREEN_KEPT - 1}`);
+  });
+});
+
+describe("finding what the question names", () => {
+  it("keeps the words worth looking for", () => {
+    expect(questionTerms("point me to Anthropic")).toEqual(["anthropic"]);
+    expect(questionTerms("Where does it talk about OpenAI's models?")).toEqual(["openai", "models"]);
+  });
+  it("keeps a far-off element the question names, past the off-screen limit", () => {
+    const el = (id: string, text: string, y: number) => ({ id, kind: "text", text, box: [0, y, 100, 20] as [number, number, number, number] });
+    const below = Array.from({ length: OFFSCREEN_KEPT + 10 }, (_, i) => el(`e${100 + i}`, "filler paragraph", 900 + i * 40));
+    const far = el("e999", "…Anthropic's Claude escaped its test environment…", 5000);
+    const kept = compactElements({ size: { w: 1280, h: 800 }, elements: [...below, far], question: "point me to Anthropic" });
+    expect(kept.map((e) => e.id)).toContain("e999");
+    expect(compactElements({ size: { w: 1280, h: 800 }, elements: [...below, far], question: "what is this" }).map((e) => e.id)).not.toContain("e999");
+  });
+});
+
+describe("news for show me", () => {
+  it("fetches for the company the question names, then the page's own", () => {
+    const elements = [{ id: "e1", kind: "heading", text: "Google's Gemini AI hacked three companies in security test", box: [0, 0, 100, 20] as [number, number, number, number] }];
+    expect(explainCompanies({ question: "point me to Anthropic", title: "Google's Gemini AI hacked three companies", elements }).map((c) => c.ticker)).toEqual(["ANTHROPIC", "GOOGL"]);
+    expect(explainCompanies({ question: "what does this chart show", title: "", elements: [] })).toEqual([]);
+  });
+  it("labels headlines as outside the page and forbids drawing them", () => {
+    expect(newsBlock([])).toBe("");
+    const out = newsBlock([{ company: "Anthropic", headlines: [{ title: "Anthropic raises funds", source: "Reuters", url: "u", publishedAt: "2026-09-18T10:00:00Z" }] }]);
+    expect(out).toContain("not from this page");
+    expect(out).toContain("never draw marks for them");
+    expect(out).toContain("- Anthropic: [Reuters] Anthropic raises funds (2026-09-18)");
+  });
+});
+
+describe("request limits", () => {
+  it("trims page text that runs long instead of rejecting the request", () => {
+    // A BBC photo's alt text (186 characters) used to fail every "show me" at the top of the article.
+    const caption = "Getty Images A close-up shot of the Gemini application on a black screen. The icon is a white square with a four-point star in Google's colours, under which the word 'Gemini' is printed.";
+    const r = ExplainInputSchema.safeParse({ question: "q".repeat(900), url: "https://x", size: { w: 1280, h: 800 }, elements: [{ id: "e1", kind: "image", text: caption, box: [0, 0, 10, 10] }] });
+    expect(r.success).toBe(true);
+    if (!r.success) return;
+    expect(r.data.elements[0]!.text).toHaveLength(160);
+    expect(r.data.question).toHaveLength(500);
+  });
+});
+
+describe("leanElements (the lean map)", () => {
+  const el = (id: string, kind: string, text: string, x: number, y: number, w = 60, h = 20) => ({ id, kind, text, box: [x, y, w, h] as [number, number, number, number] });
+  it("drops repeated banner copies, small icons and a ticker tape's tail, keeping controls and question matches", () => {
+    const tape = Array.from({ length: 20 }, (_, i) => el(`t${i}`, "link", `TOKEN${i} +${i}%`, i * 60, 69));
+    const buttons = ["1m", "5m", "15m", "1h", "4h", "1D", "1W", "1M", "3M", "6M", "1Y", "ALL", "5Y", "Log"].map((t, i) => el(`b${i}`, "button", t, i * 40, 120, 36, 20));
+    const out = leanElements(
+      [el("a1", "link", "Explore Now! →", 0, 5), el("a2", "link", "Explore Now! →", 300, 5), el("i1", "image", "Birdeye", 10, 30, 24, 24), el("i2", "image", "Revenue chart", 10, 300, 600, 300), ...tape, el("t99", "link", "Nvidia +3%", 1200, 69), ...buttons],
+      ["nvidia"],
+    ).map((e) => e.id);
+    expect(out).toContain("a1");
+    expect(out).not.toContain("a2");
+    expect(out).not.toContain("i1");
+    expect(out).toContain("i2");
+    expect(out.filter((id) => id.startsWith("t") && id !== "t99")).toHaveLength(12);
+    expect(out).toContain("t99");
+    expect(out.filter((id) => id.startsWith("b"))).toHaveLength(14);
+  });
+});
+
+describe("explainRequest", () => {
+  it("sends the lean map written with spaces, and can still build the older maps for the replay", () => {
+    const copy = { id: "e6", kind: "heading", text: "Nvidia shares jump 4% after Blackwell demand", box: [40, 700, 900, 48] };
+    const withCopy = ExplainInputSchema.parse({ ...input, url: "https://example.com/a", title: "Nvidia", question: "what is this", elements: [...input.elements, copy] });
+    const prod = explainRequest(withCopy).args;
+    expect(prod.mapFormat).toBe("spaces");
+    expect(prod.elementMap.split("\n")[0]).toBe("e1 heading 40,80,900,48 Nvidia shares jump 4% after Blackwell demand");
+    expect(prod.elementMap).not.toContain("e6");
+    const old = explainRequest(withCopy, { mapFormat: "pipes", lean: false }).args;
+    expect(old.mapFormat).toBe("pipes");
+    expect(old.elementMap).toContain("e6 | heading");
   });
 });

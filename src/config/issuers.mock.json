@@ -71,6 +71,14 @@
       "tokenProgram": "token-2022",
       "referenceMint": "oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ",
       "issuerDelegate": null
+    },
+    "FJTaC4aU1iaRT4LtT3Boggk6Yizv1gzqgkxciTXYizRM": {
+      "ticker": "GOOGL",
+      "issuer": "xStocks",
+      "decimals": 8,
+      "tokenProgram": "token-2022",
+      "referenceMint": "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN",
+      "issuerDelegate": "AqCFNAyNgMfmCyRnmWtPWvLKvL4sgzUEhggFjyzCeFPW"
     }
   }
 }

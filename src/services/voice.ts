@@ -158,7 +158,11 @@ const SETTINGS =
   /\b(?:(?:change|raise|lower|increase|decrease|set|update|reset|bump up|up) (?:my |the )?(?:daily |spending |per buy |per trade )?(?:limit|cap|leash)|withdraw|deposit|add (?:more )?(?:money|funds|cash)|top up|fund (?:my )?(?:account|vault)|put (?:more )?(?:money|cash|funds) (?:in|into) (?:my )?(?:account|vault|glance)|revoke)\b/;
 const GLANCE = /^(?:glance(?: at)?(?: this| this page| here| the page)?|whats this(?: about| page| company| stock| one)?|what is this(?: about| page| company| stock)?|what (?:company|stock) is (?:this|that)|(?:read|check) (?:this|this page|the page)|look at (?:this|this page)|what am i (?:looking at|reading|watching)(?: here| right now| now)?)$/;
 /** A question about the page itself, answered by talking and drawing on it. Checked after the fixed phrasings above. */
-const EXPLAIN = /^(?:explain|show me|click|tap|press|open|expand|select|switch to|go to|take me to|find|(?:scroll|go|jump) (?:down |up |back )?to |point (?:to|at|out)|where(?:s| is| are| do| does| can)\b|walk me through|help me (?:understand|read)|what (?:does|do|is|are|was|were|should|can|am) |how (?:do|does|much|many|is|are|did|can) |tell me (?:about|what)|can you (?:explain|show))/;
+const EXPLAIN = /^(?:explain|show me|click|tap|press|open|expand|select|switch to|go to|take me to|find|(?:scroll|go|jump) (?:down |up |back )?to |point (?:me )?(?:to|at|out)|highlight |locate |circle |underline |where(?:s| is| are| do| does| can)\b|walk me through|help me (?:understand|read)|what (?:does|do|is|are|was|were|should|can|am) |how (?:do|does|much|many|is|are|did|can) |tell me (?:about|what)|can you (?:explain|show|point|find|highlight|circle|locate))/;
+/** "…on this page", "…here", "…in this chart": the question is about the page, not the stock. */
+const PAGE_REF = /\b(?:on|in|with|about|from) (?:this|the) (?:page|article|story|chart|graph|post|video|screen|site|tweet|thread|table)\b|\bhere\b|\bon (?:my |the )?screen\b/;
+/** "Glance Anthropic": a glance aimed at the named company, like "Glance this" on its underline. */
+const GLANCE_AT = /^glance(?: at| over| on)? (?!this\b|here\b|the page\b)/;
 /** "scroll down", "page up", "back to the top": moving the page needs no model. */
 const SCROLL = /^(?:(?:scroll|page|go|move) (up|down)(?: a bit| a little| more| please)?|(?:go |scroll )?(?:back )?(?:up )?to the (top|bottom)(?: of the page)?|(?:go |scroll )?(?:back )?(top|bottom) of the page)$/;
 
@@ -220,6 +224,10 @@ export function parseCommand(text: string, ctx: VoiceContext): VoiceCommand | nu
   const scroll = SCROLL.exec(t);
   if (scroll) return command("scroll", { direction: (scroll[1] ?? scroll[2] ?? scroll[3]) as VoiceCommand["direction"] });
   if (GLANCE.test(t)) return command("glance");
+  if (GLANCE_AT.test(t)) {
+    const companyId = matchCompany(t, ctx) ?? matchAnyCompany(t);
+    if (companyId) return command("glance", { companyId });
+  }
   if (SETTINGS.test(t)) return command("settings");
   if (SELL.test(t)) {
     return command("sell", { amountUsd: ALL.test(t) ? null : parseAmount(t), companyId: matchCompany(t, ctx) ?? matchAnyCompany(t) ?? (ctx.view === "sell" ? (ctx.current?.companyId ?? null) : null), all: ALL.test(t) });
@@ -239,7 +247,8 @@ export function parseCommand(text: string, ctx: VoiceContext): VoiceCommand | nu
     if (!companyId && ctx.entities.length > 1 && !isPlainBuy(t)) return null;
     return command("buy", { amountUsd: parseAmount(t), companyId });
   }
-  if (WHY.test(t)) return command("why");
+  // "What's happening on this page?" is a question about the page; "what's going on with Nvidia today" is about the stock.
+  if (WHY.test(t)) return command(PAGE_REF.test(t) ? "explain" : "why");
   if (LIST.test(t)) return command("list");
   const amount = parseAmount(t);
   if (amount !== null && (CHANGE_AMOUNT.test(t) || AMOUNT_ONLY.test(t))) return command("amount", { amountUsd: amount });
@@ -278,7 +287,7 @@ function describe(ctx: VoiceContext): string {
 export function sanitize(c: VoiceCommand, ctx: VoiceContext): VoiceCommand {
   const known = new Set([...ctx.entities, ...(ctx.current ? [ctx.current] : [])].map((e) => e.companyId));
   // Selling and holdings can name any company Glance knows; everything else stays on the card.
-  const anyCompany = c.kind === "sell" || c.kind === "holdings";
+  const anyCompany = c.kind === "sell" || c.kind === "holdings" || c.kind === "glance";
   const companyId = c.companyId === null ? null : known.has(c.companyId) ? c.companyId : anyCompany ? matchAnyCompany(normalize(c.companyId)) : null;
   const out = command(c.kind, {
     amountUsd: c.amountUsd !== null && c.amountUsd > 0 && c.amountUsd <= MAX_USD ? c.amountUsd : null,

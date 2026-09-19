@@ -351,17 +351,17 @@ export type SpokenCommand = z.infer<typeof CommandSchema>;
 
 const COMMAND_SYSTEM = `You turn one spoken sentence into a command for Glance, a browser helper that buys small amounts of a company's stock from the page the user is reading. The sentence comes from speech recognition, so expect filler words and misheard names.
 Kinds:
-- glance: look at the page and say which company it is about ("what's this", "check this page").
+- glance: look at the page and say which company it is about ("what's this", "check this page"). With a company named, glance that company (companyId: its name): "glance Anthropic", "glance at Nvidia".
 - list: name every company on the page ("what else is here").
 - buy: buy now, with an optional amount and company ("buy ten dollars", "put twenty in Nvidia", "let's get some"). Any wording that asks to spend money on, put money in, get or grab a company is buy, also when the company is described instead of named.
 - amount: change the amount without buying ("make it twenty", "actually five"). Not when they ask to spend it: that is buy.
 - confirm: agree with what is on screen ("yes", "sounds good").
 - cancel: decline or close ("no", "never mind").
-- why: explain why the price moved ("why is it down", "what happened today").
+- why: explain why the stock's price moved, from the news ("why is it down", "what happened today"). Not a question about the page itself ("what's happening on this page" is explain).
 - pick: choose one of the on-screen companies without buying ("Nvidia", "the second one").
 - watch: ask to be told when the company can be bought ("let me know when it's available").
 - note: save a note about the purchase ("note: bought because of the China numbers").
-- explain: a question about what is on the page, answered by talking and drawing on it, or a request to click or open something on the page ("what does this chart show", "where's the price", "open the earnings tab", "show me the one year chart"). Questions about what the page says, reports or shows (results, numbers, what happened) are explain, even when nothing is open.
+- explain: a question about what is on the page, answered by talking and drawing on it, or a request to point at, find, highlight or circle something on the page, a company included ("point me to Anthropic", "where is Nvidia mentioned"), or to click or open something on the page ("what does this chart show", "where's the price", "open the earnings tab", "show me the one year chart"). Questions about what the page says, reports or shows (results, numbers, what happened) are explain, even when nothing is open.
 - scroll: move the page with no question attached ("scroll down", "go back to the top").
 - sell: sell some or all of a stock they own ("sell five dollars of Apple", "sell all my Nvidia", "cash out of Tesla").
 - balance: how much money is in their Glance account ("what's my balance", "how much cash do I have").
@@ -446,9 +446,9 @@ Speech: two to four segments, each one or two short sentences (at most 35 words)
 
 Drawing: each segment carries the marks drawn while it is spoken, at most three, and a segment may have none. Circle or box a thing when you name it; underline or highlight the exact words when you quote them; draw an arrow to a thing when you say "here" or connect two things; write a short note (at most four words) beside a thing to label it; sketch a line or path for something that is not on the page, such as a trend line across a chart or a level to watch. Keep it sparse: a mark should earn its place.
 
-Anchoring: you get a screenshot and a map of the visible elements, each with an id, a kind, its text and its box, all in the screenshot's pixels (origin top-left). Anchor a mark to an element id whenever the thing is in the map, and add a quote for words inside it. Use a box, or points, in screenshot pixels only for things with no element, such as a spot inside a chart, an image or a video. To draw at prices on a chart (level, zone), set chart to its plot area and two price labels on its axis. Elements whose box lies outside the screenshot are off screen: you cannot see them yet, but you can scroll to them.
+Anchoring: you get a screenshot and a map of the visible elements, each with an id, a kind, its text and its box, all in the screenshot's pixels (origin top-left). Anchor a mark to an element id whenever the thing is in the map, and add a quote for words inside it: to point at a name or phrase inside a longer element, set quote to exactly those words so the mark lands on them, not on the whole paragraph. Use a box, or points, in screenshot pixels only for things with no element, such as a spot inside a chart, an image or a video. To draw at prices on a chart (level, zone), set chart to its plot area and two price labels on its axis. Elements whose box lies outside the screenshot are off screen: to point at one, just mark it, and Glance scrolls it into view while that segment is said. Use a scroll action only when you need to see something off screen before you can answer, such as a chart or a table.
 
-Acting: after your segments are spoken you may take one step: scroll to an element, scroll a screen up or down, or click one link, tab, "show more" or similar control. You then get a fresh screenshot and map and continue the same answer. Act only when the question needs it (what they asked about is off screen, behind a tab or collapsed) or when they asked you to scroll, click or open something. Say what you are about to do in your last segment and circle the thing you will click. Never click anything that buys, sells, trades, pays, orders, subscribes, signs in or out, submits a form, sends, deletes, downloads, installs, accepts terms or changes settings: tell the user to do that themselves. On a later step, continue from what you already said without repeating it, and set the action to none as soon as the question is answered.`;
+Acting: after your segments are spoken you may take one step: scroll to an element, scroll a screen up or down, or click one link, tab, "show more" or similar control. You then get a fresh screenshot and map and continue the same answer. Act only when the question needs it (what they asked about is behind a tab or collapsed, or off screen and you need to see it) or when they asked you to scroll, click or open something. Say what you are about to do in your last segment and circle the thing you will click. Never click anything that buys, sells, trades, pays, orders, subscribes, signs in or out, submits a form, sends, deletes, downloads, installs, accepts terms or changes settings: tell the user to do that themselves. On a later step, continue from what you already said without repeating it, and set the action to none as soon as the question is answered.`;
 
 export interface ExplainPromptInput {
   question: string;
@@ -456,10 +456,14 @@ export interface ExplainPromptInput {
   skills: string;
   pageHeader: string;
   elementMap: string;
+  /** How elementMap is written (services/explain.ts); the header says so. */
+  mapFormat?: "pipes" | "spaces";
   /** Earlier steps of this same answer: what was said, and what was scrolled or clicked. */
   earlier: string;
   /** Pages the user asked Glance to remember, as a prompt section (services/explain.ts memoryBlock), or "". */
   memory?: string;
+  /** Recent headlines about the page's companies, as a prompt section (services/explain.ts newsBlock), or "". */
+  news?: string;
   image: { base64: string; mediaType: "image/jpeg" | "image/png" | "image/webp" } | null;
 }
 
@@ -475,7 +479,8 @@ export interface ExplainPromptInput {
  * measured 3,835 cached tokens, with one skill 4,632.
  */
 export function explainPrompt(p: ExplainPromptInput) {
-  const text = `${p.pageHeader}\n\nElement map (id | kind | box x,y,w,h | text):\n${p.elementMap}${p.memory ? `\n\n${p.memory}` : ""}\n\nThe user asked: """${p.question.slice(0, 500)}"""${p.earlier ? `\n\nSo far in this answer:\n${p.earlier}` : ""}`;
+  const mapHeader = p.mapFormat === "spaces" ? "Element map, one element per line: id, kind, box x,y,w,h, then its text:" : "Element map (id | kind | box x,y,w,h | text):";
+  const text = `${p.pageHeader}\n\n${mapHeader}\n${p.elementMap}${p.memory ? `\n\n${p.memory}` : ""}${p.news ? `\n\n${p.news}` : ""}\n\nThe user asked: """${p.question.slice(0, 500)}"""${p.earlier ? `\n\nSo far in this answer:\n${p.earlier}` : ""}`;
   const skills = p.skills.trimStart();
   const system = [
     { type: "text" as const, text: EXPLAIN_SYSTEM, cache_control: { type: "ephemeral" as const } },

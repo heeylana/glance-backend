@@ -12,6 +12,8 @@ const GlanceSchema = z.object({
   publishedAt: z.union([z.string(), z.number()]).optional(),
   text: z.string().max(20_000),
   captions: z.string().max(20_000).optional(),
+  /** A company id from /dictionary: the underline the user asked to glance. */
+  focus: z.string().max(64).optional(),
 });
 
 /** Vision fallback body: ~1280×900 JPEG at quality 60 is 100–300 KB as base64; 6 MB leaves room for retina captures. */

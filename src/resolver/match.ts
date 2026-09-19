@@ -53,6 +53,12 @@ const WEAK_PRODUCTS = new Set([
 ]);
 /** Index funds are named in passing on most finance pages; they count only when the page is about them. */
 const INCIDENTAL_IDS = new Set(["spy", "qqq", "gld", "tlt"]);
+/**
+ * Names that stay ordinary words even when capitalised, because on a page they are nearly always part
+ * of another name ("CBS News", "BBC News", "Sky News"). They count only beside other evidence for the
+ * company (its ticker, an executive, a product). Mirrored in the extension's lib/dictionary.ts.
+ */
+const GENERIC_NAMES = new Set(["news"]);
 /** A weak product on its own: still above WEAK so the LLM gets to look, below anything that could confirm. */
 const WEAK_PRODUCT_WEIGHT = 0.5;
 
@@ -237,6 +243,7 @@ function score(c: Candidate, financeContext: boolean, raw: string): number {
       else if (cs === "proper") w = financeContext ? 0.9 : 0.75;
       else if (cs === "caps") w = financeContext ? 0.9 : 0.45;
       else w = financeContext ? 0.6 : 0.45;
+      if (GENERIC_NAMES.has(e.text) && strongKinds.size < 2) w = 0.3;
     }
     if ((e.kind === "name" || e.kind === "alias") && INCIDENTAL_IDS.has(c.company.id) && !c.inTitle && c.mentions < 3) w = 0.6;
     kinds.set(e.kind, Math.max(kinds.get(e.kind) ?? 0, w));
@@ -269,6 +276,27 @@ export function dominant<T extends { inTitle: boolean; mentions: number }>(stron
   const [a, b] = [...strong].sort((x, y) => y.mentions - x.mentions);
   if (a && b && a.mentions >= 3 && a.mentions >= 3 * b.mentions) return a;
   return undefined;
+}
+
+/**
+ * Other companies the page names strongly, beside the one it is about ("Google's Gemini hacked three
+ * companies" also names Nvidia, OpenAI and Anthropic): offered as "also on this page", never as the answer.
+ */
+export function alsoMentioned(cands: Candidate[], verdict: Verdict, max = 4): Candidate[] {
+  if (verdict.kind !== "confident") return [];
+  return cands.filter((c) => c.company.id !== verdict.top.company.id && c.confidence >= CONFIDENT).slice(0, max);
+}
+
+/**
+ * A glance aimed at one company (the underline the user hovered, then "Glance this"): that company
+ * leads whatever the page is mainly about. The page's own answer, if it has one, comes first among the
+ * others ("It also mentions Google, …"), then the rest the page names strongly.
+ */
+export function focusOn(cands: Candidate[], natural: Verdict, focus: Candidate, max = 4): { verdict: Verdict; also: Candidate[] } {
+  const verdict: Verdict = { kind: "confident", top: focus };
+  const lead = natural.kind === "confident" && natural.top.company.id !== focus.company.id ? [natural.top] : [];
+  const rest = alsoMentioned(cands, verdict, max).filter((c) => !lead.some((l) => l.company.id === c.company.id));
+  return { verdict, also: [...lead, ...rest].slice(0, max) };
 }
 
 export function decide(cands: Candidate[]): Verdict {

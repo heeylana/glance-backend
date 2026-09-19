@@ -10,6 +10,7 @@
     return "generic";
   }
   const TEXT_CAP = 4000;
+  const ARTICLE_CAP = 8000;
   const clean = (s) => (s ?? "").replace(/\s+/g, " ").trim();
   function isVisible(el) {
     const r = el.getBoundingClientRect();
@@ -33,6 +34,20 @@
     }
     if (!out) out = clean(document.body.innerText).slice(0, cap);
     return out;
+  }
+  function readableText(cap, root, seed) {
+    const blocks = Array.from(root.querySelectorAll("h1,h2,h3,p,li,blockquote,figcaption,td,[data-testid='tweetText'],yt-formatted-string,span[dir]"));
+    const seen = new Set(seed ? seed.split("\n") : []);
+    let out = seed;
+    for (const el of blocks) {
+      if (el.closest("nav,footer,aside,[role='navigation'],[aria-hidden='true'],glance-bubble")) continue;
+      const t = clean(el.innerText);
+      if (t.length < 3 || seen.has(t)) continue;
+      seen.add(t);
+      if (out.length + t.length + 1 > cap) break;
+      out += (out ? "\n" : "") + t;
+    }
+    return out || clean(document.body.innerText).slice(0, cap);
   }
   function meta(name) {
     const el = document.querySelector("meta[property='" + name + "'], meta[name='" + name + "'], meta[itemprop='" + name + "']");
@@ -71,7 +86,7 @@
     const title = meta("og:title") ?? clean(document.querySelector("h1")?.textContent) ?? document.title;
     const published = meta("article:published_time") ?? meta("datePublished") ?? document.querySelector("article time[datetime], time[datetime]")?.dateTime;
     const root = document.querySelector("article, main, [role='main']") ?? document.body;
-    return { title, text: visibleText(root), publishedAt: published, url: document.querySelector("link[rel='canonical']")?.href ?? location.href };
+    return { title, text: readableText(ARTICLE_CAP, root, visibleText(root)), publishedAt: published, url: document.querySelector("link[rel='canonical']")?.href ?? location.href };
   }
   function collectContext() {
     const site = detectSite();

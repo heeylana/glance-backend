@@ -10,11 +10,20 @@ import { z } from "zod";
 import { explainPage, type ExplainAction, type ExplainChart, type Explanation, type Mark } from "./llm.js";
 import { pickSkills, skillsPrompt } from "./skills.js";
 import { parseImageDataUrl } from "../lib/screenshot.js";
+import { CONFIDENT, decide, matchText } from "../resolver/match.js";
+import type { CompanySeed } from "../resolver/companies.js";
+import { fetchHeadlines, type Headline } from "./news.js";
+
+/**
+ * Text that comes from web pages or speech is trimmed to its limit, not rejected: one long image caption
+ * or link label used to fail the whole request ("That didn't go through") on 19 Sep 2026.
+ */
+const clipped = (max: number) => z.string().max(20_000).transform((s) => s.slice(0, max));
 
 export const ExplainInputSchema = z.object({
-  question: z.string().min(1).max(500),
+  question: z.string().min(1).max(20_000).transform((s) => s.slice(0, 500)),
   url: z.string().max(2048),
-  title: z.string().max(1024).optional(),
+  title: clipped(1024).optional(),
   /** The screenshot's size, which is also the coordinate space of every box. */
   size: z.object({ w: z.number().int().min(64).max(4096), h: z.number().int().min(64).max(4096) }),
   image: z.string().max(6_000_000).regex(/^data:image\/(jpeg|png|webp);base64,/).optional(),
@@ -23,7 +32,7 @@ export const ExplainInputSchema = z.object({
       z.object({
         id: z.string().regex(/^e\d{1,4}$/),
         kind: z.string().max(16),
-        text: z.string().max(160),
+        text: clipped(160),
         box: z.tuple([z.number(), z.number(), z.number(), z.number()]),
       }),
     )
@@ -32,10 +41,10 @@ export const ExplainInputSchema = z.object({
   history: z
     .array(
       z.object({
-        said: z.array(z.string().max(300)).max(5),
+        said: z.array(clipped(300)).max(5),
         action: z.object({
           kind: z.enum(["scroll", "click"]),
-          target: z.string().max(160).nullable(),
+          target: clipped(160).nullable(),
           direction: z.enum(["up", "down"]).nullable(),
           outcome: z.enum(["done", "refused", "failed", "off"]),
         }),
@@ -74,8 +83,15 @@ const MAX_MARKS = 12;
 /** glance-extension-app/lib/page-map.ts cuts each element's text at this length. */
 const MAP_TEXT_CAP = 160;
 
-export function elementMap(elements: ExplainInput["elements"]): string {
-  return elements.map((e) => `${e.id} | ${e.kind} | ${e.box.map(Math.round).join(",")} | ${e.text.replace(/\s+/g, " ").slice(0, 120)}`).join("\n");
+/**
+ * How the element map is written: "spaces" (production since 19 Sep 2026) or the older "pipes" (` | `),
+ * which costs ~430 more tokens a call for the same answers (doc/cost-reduction-todo.md 2.1, replay `+pipes`).
+ */
+export type MapFormat = "pipes" | "spaces";
+
+export function elementMap(elements: ExplainInput["elements"], format: MapFormat = "pipes"): string {
+  const sep = format === "spaces" ? " " : " | ";
+  return elements.map((e) => [e.id, e.kind, e.box.map(Math.round).join(","), e.text.replace(/\s+/g, " ").slice(0, 120)].join(sep)).join("\n");
 }
 
 /** Letters, digits and single spaces only: "chain, holding" and "chain holding" compare equal. */
@@ -198,20 +214,114 @@ const KEEP_EMPTY = new Set(["canvas", "video", "frame"]);
  * OFFSCREEN_KEPT elements off screen. On the first capture measured (a 260-element chart page) this cut
  * 1,795 of 8,842 input tokens with no visible change in the answer.
  */
-export function compactElements(input: Pick<ExplainParsed, "elements" | "size">): ExplainParsed["elements"] {
+export function compactElements(input: Pick<ExplainParsed, "elements" | "size"> & { question?: string }, opts: { lean?: boolean } = {}): ExplainParsed["elements"] {
+  const terms = questionTerms(input.question ?? "");
   let offscreen = 0;
-  return input.elements.filter((e) => {
+  const kept = input.elements.filter((e) => {
     if (!e.text.trim() && !KEEP_EMPTY.has(e.kind)) return false;
     const visible = e.box[1] < input.size.h && e.box[1] + e.box[3] > 0;
-    return visible || ++offscreen <= OFFSCREEN_KEPT;
+    // Something the question names ("point me to Anthropic") is kept wherever it is on the page.
+    return visible || mentions(e.text, terms) || ++offscreen <= OFFSCREEN_KEPT;
   });
+  return opts.lean ? leanElements(kept, terms) : kept;
+}
+
+/** Items one row may keep before the rest is treated as a ticker tape or a long nav bar. */
+const ROW_KEPT = 12;
+/** Icons smaller than this (screenshot pixels, both sides) carry no meaning a mark needs; pixels still work. */
+const ICON_PX = 40;
+/** Controls a step may need to press ("switch to the 15 minute chart"): never trimmed from a crowded row. */
+const CONTROLS = new Set(["button", "input", "tab", "select"]);
+
+/**
+ * The lean map (production since 19 Sep 2026, doc/cost-reduction-todo.md 2.1; replay `+nolean` to turn it
+ * off): page furniture out, the content in. Drops repeated text (a scrolling banner's copies), small icons, and a crowded row's items
+ * past the first ROW_KEPT (ticker tapes, long nav bars), buttons and inputs excepted, since a step may press
+ * them. Anything the question names always stays.
+ */
+export function leanElements(elements: ExplainParsed["elements"], terms: string[] = []): ExplainParsed["elements"] {
+  const seen = new Set<string>();
+  const perRow = new Map<number, number>();
+  return elements.filter((e) => {
+    if (mentions(e.text, terms)) return true;
+    // Controls are kept whole: a step may press any of them, and "1m" and "1M" are different buttons.
+    if (CONTROLS.has(e.kind) || KEEP_EMPTY.has(e.kind)) return true;
+    if (e.kind === "image" && e.box[2] < ICON_PX && e.box[3] < ICON_PX) return false;
+    const text = e.text.trim();
+    if (text) {
+      const key = `${e.kind}:${text}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+    }
+    const row = Math.round(e.box[1] / 8);
+    const n = (perRow.get(row) ?? 0) + 1;
+    perRow.set(row, n);
+    return n <= ROW_KEPT;
+  });
+}
+
+const STOP = new Set(
+  "the a an and or of to in on at for from with by about is are was were be it its this that these those me my you your i we our can could would should will please show point find take go scroll highlight circle locate underline where what which who how why when tell explain look glance over part page site article mentioned mention talk talks talking says said so do does did has have had there here any some much many just also then than".split(" "),
+);
+
+/**
+ * The words in a question worth finding on the page: "point me to Anthropic" → ["anthropic"]. Mirrors
+ * `questionTerms` in the extension's lib/page-map.ts, which uses it to send far-off matches.
+ */
+export function questionTerms(question: string): string[] {
+  const words = question.toLowerCase().replace(/['’]s\b/g, "").match(/[\p{L}\p{N}][\p{L}\p{N}&.-]*/gu) ?? [];
+  return [...new Set(words.filter((w) => w.length >= 3 && !STOP.has(w)))].slice(0, 8);
+}
+
+const mentions = (text: string, terms: string[]) => {
+  if (!terms.length) return false;
+  const t = text.toLowerCase();
+  return terms.some((w) => t.includes(w));
+};
+
+/** Headlines about the companies a "show me" question or page is about, at most this many each. */
+const NEWS_PER_COMPANY = 5;
+
+/**
+ * Up to two companies to fetch news for: those named in the question first ("point me to Anthropic"),
+ * then the one the page is about (the title and the text on screen), if the resolver is sure.
+ */
+export function explainCompanies(input: Pick<ExplainParsed, "question" | "title" | "elements">): CompanySeed[] {
+  const out = new Map<string, CompanySeed>();
+  for (const c of matchText(input.question).filter((c) => c.confidence >= CONFIDENT)) out.set(c.company.id, c.company);
+  const title = input.title ?? "";
+  const page = decide(matchText(`${title}\n${input.elements.map((e) => e.text).join("\n")}`.slice(0, 8000), { titleLength: title.length }));
+  if (page.kind === "confident") out.set(page.top.company.id, page.top.company);
+  return [...out.values()].slice(0, 2);
+}
+
+/**
+ * The news section of a "show me" prompt: recent headlines about the page's companies, clearly from
+ * elsewhere, to be named when used and never drawn. Empty when there are none (or no news key).
+ */
+export function newsBlock(news: { company: string; headlines: Headline[] }[]): string {
+  const rows = news.flatMap((n) => n.headlines.slice(0, NEWS_PER_COMPANY).map((h) => `- ${n.company}: [${h.source}] ${h.title} (${h.publishedAt.slice(0, 10)})`));
+  if (!rows.length) return "";
+  return `Recent headlines about ${news.map((n) => n.company).join(" and ")}, from the news, not from this page (use them only when they help answer the question, say which outlet when you do, and never draw marks for them):\n${rows.join("\n")}`;
+}
+
+/** Fetch the news section for a question (Finnhub, cached two minutes per company; "" without a key). */
+export async function newsContext(input: Pick<ExplainParsed, "question" | "title" | "elements">): Promise<string> {
+  const companies = explainCompanies(input);
+  if (!companies.length) return "";
+  const news = await Promise.all(
+    companies.map(async (c) => ({ company: c.name, headlines: await fetchHeadlines({ ticker: c.ticker, name: c.name, sinceMinutes: 1440 }).catch(() => []) })),
+  );
+  return newsBlock(news);
 }
 
 /**
  * Everything `explainPage` is given for one request, plus the skills picked; the replay script builds
- * requests the same way. `fullMap` skips compactElements, to compare against the uncut map.
+ * requests the same way. Production sends the lean map written with spaces; the options exist to replay
+ * the older maps: `lean: false` compacts without leanElements, `fullMap` sends the uncut map.
  */
-export function explainRequest(input: ExplainParsed, opts: { fullMap?: boolean } = {}) {
+export function explainRequest(input: ExplainParsed, opts: { fullMap?: boolean; mapFormat?: MapFormat; lean?: boolean } = {}) {
+  const { mapFormat = "spaces", lean = true } = opts;
   const img = input.image ? parseImageDataUrl(input.image) : null;
   const pageHeader = [`Page: ${input.title ?? "(untitled)"}`, `URL: ${input.url}`, `Screenshot: ${input.size.w}x${input.size.h} pixels${img ? "" : " (not available; use the element map only)"}`].join("\n");
   const skills = pickSkills({ question: input.question, title: input.title, url: input.url });
@@ -219,7 +329,9 @@ export function explainRequest(input: ExplainParsed, opts: { fullMap?: boolean }
     question: input.question,
     skills: skillsPrompt(skills),
     pageHeader,
-    elementMap: elementMap(opts.fullMap ? input.elements : compactElements(input)),
+    elementMap: elementMap(opts.fullMap ? input.elements : compactElements(input, { lean }), mapFormat),
+    mapFormat,
+    news: "",
     earlier: earlierSteps(input.history),
     memory: memoryBlock(input.memory),
     image: img ? { base64: img.base64, mediaType: img.mediaType } : null,
@@ -229,6 +341,7 @@ export function explainRequest(input: ExplainParsed, opts: { fullMap?: boolean }
 
 export async function explain(input: ExplainParsed): Promise<ExplainResult | null> {
   const { args, skills, img } = explainRequest(input);
+  args.news = await newsContext(input);
   const ex = await explainPage(args);
   if (!ex) return null;
   const clean = sanitizeExplanation(ex, input);

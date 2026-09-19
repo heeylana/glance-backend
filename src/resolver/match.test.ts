@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decide, matchText, wordCase } from "./match.js";
+import { alsoMentioned, CONFIDENT, decide, focusOn, matchText, wordCase } from "./match.js";
 
 const top = (s: string) => matchText(s)[0];
 
@@ -142,5 +142,41 @@ describe("wordCase", () => {
   it("all-caps META with finance words is the company; without them it is anyone's guess", () => {
     expect(top("META earnings after the bell")!.confidence).toBeGreaterThanOrEqual(0.8);
     expect(top("Working on the META analysis")!.confidence).toBeLessThan(0.5);
+  });
+});
+
+// A BBC article (19 Sep 2026) about Google that also names Nvidia, OpenAI and Anthropic: the glance
+// only showed Google, and "News" in "CBS News" scored as News Corp.
+const BBC_TITLE = "Google's Gemini AI hacked three companies in security test";
+const BBC = `${BBC_TITLE}
+Google's AI model Gemini autonomously hacked into three companies during a test of its cyber-security capabilities, the company has said.
+In July, Anthropic's Claude escaped its test environment to hack three organisations on its own just days after OpenAI said its models had carried out cyber-attacks.
+Both Nvidia's CEO Jensen Huang and OpenAI Chief Executive Sam Altman are expected to attend a White House state dinner next Friday.
+On Friday, Huang told CBS News, the BBC's US partner, "we should go as fast as we can" with AI development.`;
+
+describe("a page about one company that names others", () => {
+  const cands = matchText(BBC, { titleLength: BBC_TITLE.length });
+  const verdict = decide(cands);
+  it("answers with the company in the headline", () => {
+    expect(verdict.kind).toBe("confident");
+    if (verdict.kind === "confident") expect(verdict.top.company.ticker).toBe("GOOGL");
+  });
+  it("offers the other strongly named companies as also on this page", () => {
+    expect(alsoMentioned(cands, verdict).map((c) => c.company.ticker).sort()).toEqual(["ANTHROPIC", "NVDA", "OPENAI"]);
+  });
+  it("does not read another outlet's name as News Corp", () => {
+    const news = cands.find((c) => c.company.ticker === "NWS" || c.company.ticker === "NWSA");
+    expect(news === undefined || news.confidence < CONFIDENT).toBe(true);
+  });
+  it("leads with the company the user focused on, and names the page's own subject first after it", () => {
+    const anthropic = cands.find((c) => c.company.ticker === "ANTHROPIC")!;
+    const focused = focusOn(cands, verdict, anthropic);
+    expect(focused.verdict.kind).toBe("confident");
+    if (focused.verdict.kind === "confident") expect(focused.verdict.top.company.ticker).toBe("ANTHROPIC");
+    expect(focused.also.map((c) => c.company.ticker)[0]).toBe("GOOGL");
+    expect(focused.also.map((c) => c.company.ticker).sort()).toEqual(["GOOGL", "NVDA", "OPENAI"]);
+  });
+  it("offers nothing extra when the answer is not confident", () => {
+    expect(alsoMentioned(cands, { kind: "none" })).toEqual([]);
   });
 });

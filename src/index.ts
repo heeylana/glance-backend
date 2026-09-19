@@ -42,7 +42,12 @@ app.use("*", logger((s) => log.debug(s)));
 app.onError((err, c) => {
   if (err instanceof GuardError) {
     if (err.status >= 500) log.error("guard error", { code: err.code, msg: err.message });
-    else log.info("guard rejected", { code: err.code, path: c.req.path });
+    else {
+      // For a rejected body, which fields failed (paths and zod codes only, never the values).
+      const detail = (err.ctx as { detail?: { path: PropertyKey[]; code: string; message?: string }[] }).detail;
+      const fields = Array.isArray(detail) ? detail.slice(0, 5).map((i) => `${i.path.map(String).join(".")}: ${i.code}`) : undefined;
+      log.info("guard rejected", { code: err.code, path: c.req.path, ...(fields ? { fields } : {}) });
+    }
     return c.json(err.toResponse(), err.status as 400);
   }
   const cause = (err as { cause?: unknown }).cause;

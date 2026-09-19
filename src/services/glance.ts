@@ -3,7 +3,8 @@
  * disambiguation only when needed → registry lookup → Pyth live price →
  * price at publish → one spoken sentence.
  */
-import { matchText, decide, type Candidate, type Verdict } from "../resolver/match.js";
+import { alsoMentioned, focusOn, matchText, decide, type Candidate, type Verdict } from "../resolver/match.js";
+import { COMPANIES } from "../resolver/companies.js";
 import { loadRegistry } from "../config/issuers.js";
 import { getMarketQuotes, getReferencePrices, getPriceAtDetailed, type MarketQuote, type RefPrice } from "./prices.js";
 import { disambiguate, readScreenshot, type Pick } from "./llm.js";
@@ -23,6 +24,16 @@ export interface GlanceInput {
   publishedAt?: string | number;
   text: string;
   captions?: string;
+  /** The company the user asked about by hovering its underline and pressing "Glance this": it leads the answer. */
+  focus?: string;
+}
+
+/** The focused company as a candidate: its match on this page, or straight from the dictionary (the user picked it). */
+function focusCandidate(cands: Candidate[], id: string): Candidate | null {
+  const hit = cands.find((c) => c.company.id === id);
+  if (hit) return hit;
+  const company = COMPANIES.find((k) => k.id === id);
+  return company ? { company, confidence: 1, evidence: [], firstIndex: 0, mentions: 0, inTitle: false } : null;
 }
 
 /** One token of a company (spec extension: several issuers can tokenize the same company). */
@@ -135,8 +146,10 @@ export async function glance(input: GlanceInput): Promise<GlanceResult> {
   const corpus = [input.title, input.text, input.captions].filter(Boolean).join("\n").slice(0, 8000);
   const cands = matchText(corpus, { titleLength: input.title?.length ?? 0 });
   let verdict = decide(cands);
+  const focus = input.focus ? focusCandidate(cands, input.focus) : null;
 
-  if (verdict.kind === "disambiguate") {
+  // No need to ask the model which company the page means when the user already said.
+  if (verdict.kind === "disambiguate" && !focus) {
     const candidates = verdict.candidates.map((c) => ({ id: c.company.id, name: c.company.name, ticker: c.company.ticker }));
     const key = sha256Hex(Buffer.from(`${candidates.map((c) => c.id).sort().join(",")}\n${corpus}`));
     const cached = picks.get(key);
@@ -155,8 +168,11 @@ export async function glance(input: GlanceInput): Promise<GlanceResult> {
     }
   }
 
-  const picked: Candidate[] =
-    verdict.kind === "confident" ? [verdict.top] : verdict.kind === "none" ? [] : verdict.candidates.slice(0, 3);
+  // The page's subject first (or the company the user focused on); for a confident answer, then the other
+  // companies it names strongly, which the card offers as "also on this page" and "what else is here?" lists.
+  let also = alsoMentioned(cands, verdict);
+  if (focus) ({ verdict, also } = focusOn(cands, verdict, focus));
+  const picked: Candidate[] = verdict.kind === "confident" ? [verdict.top, ...also] : verdict.kind === "none" ? [] : verdict.candidates.slice(0, 3);
 
   const reg = loadRegistry();
   const publishedAt = parsePublishedAt(input.publishedAt);
@@ -233,12 +249,20 @@ export async function glance(input: GlanceInput): Promise<GlanceResult> {
     textLen: input.text.length,
     verdict: verdict.kind,
     top: entities[0] ? `${entities[0].ticker}:${entities[0].confidence}` : null,
+    also: entities.slice(1).map((e) => e.ticker),
+    focus: input.focus ?? null,
     candidates: cands.length,
   });
   return { verdict: verdict.kind, entities, summary, publishedAt: publishedAt?.toISOString() ?? null, amountChips: [5, 10, 25], source: "text" };
 }
 
 function summarize(kind: Verdict["kind"], entities: GlanceEntity[], hasPublish: boolean, site?: string): string {
+  const line = summaryLine(kind, entities, hasPublish, site);
+  const also = kind === "confident" ? entities.slice(1).map((e) => e.name) : [];
+  return also.length ? `${line} It also mentions ${listNames(also)}.` : line;
+}
+
+function summaryLine(kind: Verdict["kind"], entities: GlanceEntity[], hasPublish: boolean, site?: string): string {
   const since = site === "youtube" ? "since this video went up" : site === "x" ? "since this was posted" : "since this was published";
   if (kind === "none" || entities.length === 0) return "I couldn't find a company on this page.";
   if (kind === "multiple") return `I see ${listNames(entities.map((e) => e.name))} here. Which one?`;
