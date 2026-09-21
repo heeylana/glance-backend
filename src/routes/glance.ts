@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { auth, body, router } from "./_shared.js";
-import { glance, glanceScreenshot } from "../services/glance.js";
+import { glance, glanceScreenshot, lookupCompany } from "../services/glance.js";
+import { priceSeries, tokenMarket } from "../services/birdeye.js";
 import { loadRegistry } from "../config/issuers.js";
 import { getReferencePrices } from "../services/prices.js";
 import { COMPANIES } from "../resolver/companies.js";
@@ -33,6 +34,33 @@ r.post("/glance", async (c) => {
   const input = await body(c, GlanceSchema);
   const result = await glance(input);
   return c.json({ ok: true, ...result });
+});
+
+/**
+ * POST /company — one company asked about out loud, with no page involved (voice kind `stock`):
+ * "how's Nvidia doing?". The same entity a glance returns, so the card can offer Buy, plus the
+ * spoken line. No model call: the user is holding a key, waiting.
+ */
+r.post("/company", async (c) => {
+  const b = await body(c, z.object({ companyId: z.string().max(64).optional(), ticker: z.string().max(12).optional() }).refine((x) => !!x.companyId || !!x.ticker, { message: "companyId or ticker" }));
+  const found = await lookupCompany(b);
+  if (!found) return c.json({ ok: false, code: "UNKNOWN_COMPANY", message: "I don't know that company yet." }, 404);
+  // `market` is Birdeye's, and null without its key or when it was slow: the card shows the day's
+  // numbers when they are there and stays a plain buy card when they are not.
+  return c.json({ ok: true, ...found });
+});
+
+/**
+ * POST /company/history — the day's price path for the little chart on the card, hourly from
+ * Birdeye. Asked for after the card is already up, so it draws itself while Glance is still
+ * talking; an empty answer just means no chart.
+ */
+r.post("/company/history", async (c) => {
+  const b = await body(c, z.object({ mint: z.string().min(32).max(64) }));
+  // The market comes back too: when it was too slow for the spoken line, this is how the card still
+  // ends up showing the day's volume and liquidity. By now it is usually the cached copy.
+  const [points, market] = await Promise.all([priceSeries(b.mint).catch(() => null), tokenMarket(b.mint).catch(() => null)]);
+  return c.json({ ok: true, points: points ?? [], market });
 });
 
 /** POST /glance/vision — screenshot in when the page had no readable text (spec §7.3); same result shape out. */

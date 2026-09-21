@@ -159,12 +159,33 @@ const SETTINGS =
 const GLANCE = /^(?:glance(?: at)?(?: this| this page| here| the page)?|whats this(?: about| page| company| stock| one)?|what is this(?: about| page| company| stock)?|what (?:company|stock) is (?:this|that)|(?:read|check) (?:this|this page|the page)|look at (?:this|this page)|what am i (?:looking at|reading|watching)(?: here| right now| now)?)$/;
 /** A question about the page itself, answered by talking and drawing on it. Checked after the fixed phrasings above. */
 const EXPLAIN = /^(?:explain|show me|click|tap|press|open|expand|select|switch to|go to|take me to|find|(?:scroll|go|jump) (?:down |up |back )?to |point (?:me )?(?:to|at|out)|highlight |locate |circle |underline |where(?:s| is| are| do| does| can)\b|walk me through|help me (?:understand|read)|what (?:does|do|is|are|was|were|should|can|am) |how (?:do|does|much|many|is|are|did|can) |tell me (?:about|what)|can you (?:explain|show|point|find|highlight|circle|locate))/;
+/** "this page", "that article", "the chart": the thing asked about is the page itself. */
+const PAGE_NOUN = /\b(?:this|that|the) (?:page|article|story|post|video|screen|site|tweet|thread|chart|graph|table)\b/;
 /** "…on this page", "…here", "…in this chart": the question is about the page, not the stock. */
 const PAGE_REF = /\b(?:on|in|with|about|from) (?:this|the) (?:page|article|story|chart|graph|post|video|screen|site|tweet|thread|table)\b|\bhere\b|\bon (?:my |the )?screen\b/;
 /** "Glance Anthropic": a glance aimed at the named company, like "Glance this" on its underline. */
 const GLANCE_AT = /^glance(?: at| over| on)? (?!this\b|here\b|the page\b)/;
 /** "scroll down", "page up", "back to the top": moving the page needs no model. */
 const SCROLL = /^(?:(?:scroll|page|go|move) (up|down)(?: a bit| a little| more| please)?|(?:go |scroll )?(?:back )?(?:up )?to the (top|bottom)(?: of the page)?|(?:go |scroll )?(?:back )?(top|bottom) of the page)$/;
+
+/**
+ * A question about a company itself, not about the page or the account: "how's Nvidia doing?",
+ * "what's Apple trading at?", "tell me about Tesla". Answered from the price feed, with the buy card
+ * opened on that company. Checked before EXPLAIN, which owns the same openings about the page
+ * ("tell me about this chart"), and only when a company Glance knows is actually named.
+ */
+const STOCK =
+  /\b(?:trading at|share price|stock price|whats (?:the )?price|how much (?:is|are|does .* cost)|whats .* (?:worth|at|going for)|hows .* (?:doing|looking|trading|performing)|how (?:is|are|did) .* (?:doing|looking|trading|performing|do today)|hows (?:the )?(?:stock|share)|is .* (?:up|down|rising|falling|green|red)|tell me about|whats up with|hows it going with|how are they doing|price of)\b/;
+/**
+ * Asking Glance what it makes of a company: "should I buy Nvidia?", "is Tesla worth it?", "what do
+ * you think of Apple?", "give me your take". Answered from the price, the token's market and the
+ * week's news, both sides, and always with the disclaimer (services/advice.ts). Checked before STOCK,
+ * which owns the plain "how's it doing?", and before BUY, because "should I buy" is a question.
+ */
+const ADVICE =
+  /\b(?:should i (?:buy|get|grab|pick up|invest)|(?:is|are) (?:it|this|that|they|\w+) (?:a )?(?:good|bad|smart|safe|wise) (?:buy|investment|idea|bet|time)|worth (?:buying|getting|a buy|it)|what do you (?:think|reckon|make of)|whats your (?:take|read|view|opinion|call)|(?:give me|whats) your (?:take|read|view|opinion)|would you buy|do you (?:like|rate)|(?:any )?advice|thoughts on)\b/;
+/** "Buy" heard as "by" or "bye" in front of an amount: speech recognition's most common miss here. */
+const BUY_HOMOPHONE = /^(?:by|bye|bi)\b(?=\s+(?:me\s+|some\s+|a\s+|an\s+)?(?:\$?\d|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|hundred|a hundred))/;
 
 /** The account: what is left to spend today, what is owned, how much cash, and selling. */
 const LIMIT = /\b(?:daily limit|my limit|spending limit|limit left|left to spend|(?:can|could) i (?:still )?(?:spend|buy)|how much (?:more )?(?:can|could) i (?:spend|buy)|left (?:for )?today)\b/;
@@ -208,6 +229,7 @@ function trimFiller(t: string): string {
     .replace(/^(?:(?:hey|hi|ok|okay) glance\s+)/, "")
     .replace(/^(?:(?:um|uh|so|oh|well|and|hmm)\s+)+/, "")
     .replace(/\s+(?:please|thanks|thank you)$/, "")
+    .replace(BUY_HOMOPHONE, "buy")
     .trim();
 }
 
@@ -239,6 +261,23 @@ export function parseCommand(text: string, ctx: VoiceContext): VoiceCommand | nu
     if (companyId || SHARES.test(t)) return command("holdings", { companyId });
   }
   if (BALANCE.test(t)) return command("balance");
+  // A question about what Glance makes of a company, rather than what it costs. "What do you think
+  // of this page?" names the page, not a company, so it goes to the page answer below.
+  if (ADVICE.test(t) && !PAGE_REF.test(t) && !PAGE_NOUN.test(t)) {
+    const onCard = ["company", "ask", "done"].includes(ctx.view) ? (ctx.current?.companyId ?? null) : null;
+    const companyId = matchCompany(t, ctx) ?? matchAnyCompany(t) ?? onCard;
+    if (companyId) return command("advice", { companyId });
+  }
+  // "How's Nvidia doing?" is about the stock; "how's this page doing" is not, and neither is
+  // anything about the user's own money, which the rules above have already claimed. Asking what
+  // moved the price ("why is Nvidia down") stays the news answer below.
+  if (STOCK.test(t) && !WHY.test(t) && !PAGE_REF.test(t) && !ABOUT_ME.test(t)) {
+    // "How's it doing?" over a company's card is about that company; over anything else it is a
+    // question about the page, which the next rule takes.
+    const onCard = ["company", "ask", "done"].includes(ctx.view) ? (ctx.current?.companyId ?? null) : null;
+    const companyId = matchCompany(t, ctx) ?? matchAnyCompany(t) ?? onCard;
+    if (companyId) return command("stock", { companyId });
+  }
   if (EXPLAIN.test(t) && !ABOUT_ME.test(t)) return command("explain");
   if (WATCH.test(t)) return command("watch");
   if (BUY.test(t)) {
@@ -287,7 +326,7 @@ function describe(ctx: VoiceContext): string {
 export function sanitize(c: VoiceCommand, ctx: VoiceContext): VoiceCommand {
   const known = new Set([...ctx.entities, ...(ctx.current ? [ctx.current] : [])].map((e) => e.companyId));
   // Selling and holdings can name any company Glance knows; everything else stays on the card.
-  const anyCompany = c.kind === "sell" || c.kind === "holdings" || c.kind === "glance";
+  const anyCompany = c.kind === "sell" || c.kind === "holdings" || c.kind === "glance" || c.kind === "stock" || c.kind === "advice";
   const companyId = c.companyId === null ? null : known.has(c.companyId) ? c.companyId : anyCompany ? matchAnyCompany(normalize(c.companyId)) : null;
   const out = command(c.kind, {
     amountUsd: c.amountUsd !== null && c.amountUsd > 0 && c.amountUsd <= MAX_USD ? c.amountUsd : null,
@@ -296,7 +335,7 @@ export function sanitize(c: VoiceCommand, ctx: VoiceContext): VoiceCommand {
     note: c.kind === "note" && c.note ? c.note.slice(0, 1000) : null,
     direction: c.kind === "scroll" ? c.direction : null,
   });
-  if ((out.kind === "scroll" && !out.direction) || (out.kind === "pick" && !out.companyId) || (out.kind === "amount" && out.amountUsd === null) || (out.kind === "note" && !out.note)) return UNKNOWN;
+  if ((out.kind === "scroll" && !out.direction) || (out.kind === "pick" && !out.companyId) || (out.kind === "stock" && !out.companyId) || (out.kind === "advice" && !out.companyId) || (out.kind === "amount" && out.amountUsd === null) || (out.kind === "note" && !out.note)) return UNKNOWN;
   return out;
 }
 

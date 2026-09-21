@@ -8,14 +8,26 @@ import { createHash } from "node:crypto";
 import { env } from "../config.js";
 import { log } from "../lib/log.js";
 
-export const TTS_MAX_CHARS = 400;
+/**
+ * A spoken line's ceiling. It was 400, which silently dropped the four-part read (services/advice.ts,
+ * about 520 characters) to the browser's own voice, because the route rejected the body and the
+ * extension's speak() falls back on any failure. Long answers are said a line at a time, so this is
+ * only the backstop for one unusually long line.
+ */
+export const TTS_MAX_CHARS = 1_000;
 const FISH_TTS = "https://api.fish.audio/v1/tts";
 const CACHE_MAX = 200;
 const cache = new Map<string, { bytes: Buffer; mime: string }>();
 
 /** Collapse whitespace, soften the em dash the copy uses, and cap the length. */
 export function normalizeSpeech(text: string): string {
-  return text.replace(/\s*[—–]\s*/g, ", ").replace(/\s+/g, " ").trim().slice(0, TTS_MAX_CHARS);
+  const line = text.replace(/\s*[—–]\s*/g, ", ").replace(/\s+/g, " ").trim();
+  // Clipping mid-sentence is worse than saying less: cut at the last sentence that fits.
+  if (line.length <= TTS_MAX_CHARS) return line;
+  const cut = line.slice(0, TTS_MAX_CHARS);
+  const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("? "), cut.lastIndexOf("! "));
+  log.warn("tts line too long", { chars: line.length });
+  return stop > TTS_MAX_CHARS / 2 ? cut.slice(0, stop + 1) : cut;
 }
 
 export function ttsKey(text: string): string {

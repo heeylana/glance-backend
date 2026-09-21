@@ -209,3 +209,83 @@ describe("sanitize for the account", () => {
     expect(sanitize({ kind: "buy", amountUsd: 5, companyId: "Apple", note: null, direction: null, all: null }, closed)).toMatchObject({ companyId: null });
   });
 });
+
+describe("questions about a stock", () => {
+  it("answers about a company named out loud, on the page or not", () => {
+    expect(say("How's Nvidia doing?", closed)).toMatchObject({ kind: "stock", companyId: "nvda" });
+    expect(say("What's Apple trading at?")).toMatchObject({ kind: "stock", companyId: "aapl" });
+    expect(say("What's the price of Tesla?", closed)).toMatchObject({ kind: "stock", companyId: "tsla" });
+    expect(say("Is Microsoft up today?", closed)).toMatchObject({ kind: "stock", companyId: "msft" });
+    expect(say("Tell me about Palantir.", closed)).toMatchObject({ kind: "stock", companyId: "pltr" });
+    expect(say("How much is Amazon?", closed)).toMatchObject({ kind: "stock", companyId: "amzn" });
+  });
+
+  it("takes the card's company when the question says \u201cit\u201d", () => {
+    expect(say("How's it doing today?")).toMatchObject({ kind: "stock", companyId: "aapl" });
+    expect(say("What's it trading at?")).toMatchObject({ kind: "stock", companyId: "aapl" });
+    // With no company card open, the same words are a question about the page.
+    expect(say("How's it doing today?", closed)?.kind).not.toBe("stock");
+    // Several companies offered and none picked: nothing to answer about yet.
+    expect(say("How's it doing today?", choice)?.kind).not.toBe("stock");
+  });
+
+  it("leaves the page, the account and the news to their own kinds", () => {
+    // A question about what is on screen is still "show me", even worded like a stock question.
+    expect(say("Tell me about this chart.")).toMatchObject({ kind: "explain" });
+    // Nothing to look up when no company is named: the page's own question path takes it.
+    expect(say("What's the price on this page?")?.kind).not.toBe("stock");
+    // The user's own money.
+    expect(say("How much Apple do I have?")).toMatchObject({ kind: "holdings" });
+    expect(say("How much money do I have?")).toMatchObject({ kind: "balance" });
+    expect(say("How much can I still spend today?")).toMatchObject({ kind: "limit" });
+    // Why it moved stays the news answer, and selling stays selling.
+    expect(say("Why is Nvidia down?")).toMatchObject({ kind: "why" });
+    expect(say("Sell all my Apple.")).toMatchObject({ kind: "sell" });
+    // No company named and no card open: nothing to look up, so the page answers it.
+    expect(say("Tell me about it.", closed)).toMatchObject({ kind: "explain" });
+  });
+
+  it("keeps a stock question to a company Glance knows", () => {
+    expect(sanitize({ kind: "stock", amountUsd: null, companyId: "Nvidia", note: null, direction: null, all: null }, closed)).toMatchObject({ kind: "stock", companyId: "nvda" });
+    expect(sanitize({ kind: "stock", amountUsd: null, companyId: "Bob's Fish Bar", note: null, direction: null, all: null }, closed)).toMatchObject({ kind: "unknown" });
+  });
+});
+
+describe("what speech recognition mishears", () => {
+  it("reads “by ten dollars” as a buy, so it never waits on the model", () => {
+    expect(say("By ten dollars.")).toMatchObject({ kind: "buy", amountUsd: 10 });
+    expect(say("Bye twenty.")).toMatchObject({ kind: "buy", amountUsd: 20 });
+    // "by" that is not an amount is left alone.
+    expect(say("Stand by.")).toBeNull();
+  });
+});
+
+describe("asking Glance what it makes of a company", () => {
+  it("hears a question about the company, not an order to buy", () => {
+    expect(say("Should I buy Nvidia?", closed)).toMatchObject({ kind: "advice", companyId: "nvda" });
+    expect(say("Is Tesla worth buying?", closed)).toMatchObject({ kind: "advice", companyId: "tsla" });
+    expect(say("What do you think of Apple?", closed)).toMatchObject({ kind: "advice", companyId: "aapl" });
+    expect(say("What's your take on Palantir?", closed)).toMatchObject({ kind: "advice", companyId: "pltr" });
+    // Over an open card, "should I?" is about that company.
+    expect(say("Should I buy it?")).toMatchObject({ kind: "advice", companyId: "aapl" });
+    expect(say("Is this a good buy?")).toMatchObject({ kind: "advice", companyId: "aapl" });
+  });
+
+  it("still buys when told to buy", () => {
+    expect(say("Buy ten dollars of Apple.")).toMatchObject({ kind: "buy", amountUsd: 10 });
+    // "Buy it" over a card is already read as agreeing with what is on screen, which presses Buy.
+    expect(say("Buy it.")).toMatchObject({ kind: "confirm" });
+    expect(say("Yes.")).toMatchObject({ kind: "confirm" });
+  });
+
+  it("leaves the price question and the page question alone", () => {
+    expect(say("How's Nvidia doing?", closed)).toMatchObject({ kind: "stock" });
+    expect(say("What do you think of this page?")?.kind).not.toBe("advice");
+  });
+
+  it("needs a company before it will read one", () => {
+    expect(say("What do you think?", closed)?.kind).not.toBe("advice");
+    expect(sanitize({ kind: "advice", amountUsd: null, companyId: "Nvidia", note: null, direction: null, all: null }, closed)).toMatchObject({ kind: "advice", companyId: "nvda" });
+    expect(sanitize({ kind: "advice", amountUsd: null, companyId: "nowhere inc", note: null, direction: null, all: null }, closed)).toMatchObject({ kind: "unknown" });
+  });
+});

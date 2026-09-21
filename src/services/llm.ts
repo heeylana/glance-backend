@@ -75,7 +75,7 @@ function modelParams(model: string) {
   return { model, ...fallbackParams(model) };
 }
 
-export type LlmRoute = "disambiguate" | "explainMove" | "readScreenshot" | "counterView" | "interpretCommand" | "explainPage" | "notePage";
+export type LlmRoute = "disambiguate" | "explainMove" | "readScreenshot" | "counterView" | "stockRead" | "interpretCommand" | "explainPage" | "notePage";
 
 export interface UsageLine {
   route: LlmRoute;
@@ -288,6 +288,47 @@ const CounterSchema = z.object({
  * Counter-view (spec §7.5): the strongest bear case from the last week's headlines, one sentence,
  * shown under the amount before a buy. Null when nothing in the list argues against buying.
  */
+const StockReadSchema = z.object({
+  now: z.string().max(190).describe("What is going on with the stock right now, in at most 26 spoken words: the day's move, and the most-cited reason from the headlines if there is one"),
+  forIt: z.string().max(150).describe("The strongest case for it that the facts support, at most 18 words, or empty when the facts support none"),
+  against: z.string().max(150).describe("The strongest case against, at most 18 words, or empty when nothing argues against"),
+  watch: z.string().max(120).describe("The one thing that would change the picture, at most 14 words, or empty"),
+});
+export type StockRead = z.infer<typeof StockReadSchema>;
+
+/**
+ * "What do you think of Nvidia?" answered from the facts Glance has: the price and the day's move,
+ * how the token itself trades (Birdeye), and the week's headlines. Both sides, never a
+ * recommendation — the route adds a disclaimer the model cannot touch, and the schema has no field
+ * for a verdict, so there is nowhere for "buy it" to go.
+ */
+export async function stockRead(p: { name: string; ticker: string; facts: string[]; headlines: Headline[] }): Promise<StockRead | null> {
+  return structured("stockRead", fastModel(), StockReadSchema, {
+    max_tokens: 500,
+    system:
+      "You help someone reading the news think about a company whose stock they can buy in one tap. You are not an analyst and you never tell them what to do: no 'buy', 'sell', 'hold', 'avoid', no price targets, no predictions stated as fact. Lay out what is happening and both sides of it, in plain spoken English a friend would use, from the facts and headlines given and nothing else. Attribute opinions to whoever holds them ('one analyst argues…'). Say plainly when the facts are thin: an empty field is better than a guess. Never mention that you are an AI or that this is not advice; that line is added for you.",
+    messages: [
+      {
+        role: "user",
+        content: `Company: ${p.name} (${p.ticker}).
+
+What Glance knows right now:
+${p.facts.map((f) => `- ${f}`).join("\n")}
+
+Headlines from the last 7 days:
+${
+          p.headlines.length
+            ? p.headlines
+                .slice(0, 20)
+                .map((h, i) => `${i}. [${h.source}] ${h.title} (${h.publishedAt})`)
+                .join("\n")
+            : "(none found)"
+        }`,
+      },
+    ],
+  });
+}
+
 export async function counterView(p: { name: string; ticker: string; headlines: Headline[] }): Promise<{ text: string; headlineIndex: number | null } | null> {
   if (p.headlines.length === 0) return null;
   const out = await structured("counterView", fastModel(), CounterSchema, {
@@ -337,12 +378,12 @@ export async function notePage(p: { url: string; title?: string; site?: string; 
   });
 }
 
-export const COMMAND_KINDS = ["glance", "list", "buy", "sell", "amount", "confirm", "cancel", "why", "pick", "watch", "note", "explain", "scroll", "balance", "limit", "holdings", "remember", "settings", "unknown"] as const;
+export const COMMAND_KINDS = ["glance", "list", "buy", "sell", "amount", "confirm", "cancel", "why", "pick", "watch", "note", "explain", "scroll", "balance", "limit", "holdings", "stock", "advice", "remember", "settings", "unknown"] as const;
 
 const CommandSchema = z.object({
   kind: z.enum(COMMAND_KINDS),
   amountUsd: z.number().nullable().describe("The dollar amount the user said, or null. Never invent one."),
-  companyId: z.string().nullable().describe("The id of the on-screen company the user named or pointed at; for sell and holdings, the name or ticker of any company they named; or null"),
+  companyId: z.string().nullable().describe("The id of the on-screen company the user named or pointed at; for sell, holdings and stock, the name or ticker of any company they named; or null"),
   note: z.string().max(1000).nullable().describe("For kind=note only: the note itself, without the word 'note'"),
   direction: z.enum(["up", "down", "top", "bottom"]).nullable().describe("For kind=scroll only: which way, or to the top or bottom of the page"),
   all: z.boolean().nullable().describe("For kind=sell: true when they said all of it (everything, the whole position)"),
@@ -367,6 +408,8 @@ Kinds:
 - balance: how much money is in their Glance account ("what's my balance", "how much cash do I have").
 - limit: how much more Glance may spend today under their daily limit ("how much can I still spend today", "what's my daily limit").
 - holdings: what they own, or how much of one company ("what do I own", "how much Apple do I have", "how are my stocks doing").
+- advice: asking what Glance makes of a company, rather than what it costs ("should I buy Nvidia", "is Tesla worth it", "what do you think of Apple", "your take on Palantir"). companyId: the company they named, or the one on screen. Glance answers with both sides and a disclaimer; it never recommends.
+- stock: a question about one company's price or how its stock is doing, whether or not that company is on the page ("how's Nvidia doing", "what's Apple trading at", "is Tesla up today", "tell me about Palantir"). companyId: the name or ticker they said, or the company on screen when they said "it". Asking which company the page is about is glance; asking what moved the price is why.
 - remember: keep this page in mind to use on other pages later ("remember this page", "save this article for later"). Not a note about a purchase: "remember that I bought it for the China numbers" is note.
 - settings: a change only the account owner can make, with their wallet: the daily limit or caps, deposits, withdrawals, revoking Glance ("raise my limit to fifty", "withdraw twenty dollars", "move my cash back to my wallet"). Glance answers where to make it.
 - unknown: anything else.

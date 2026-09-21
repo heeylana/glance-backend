@@ -78,6 +78,8 @@ const Env = z.object({
   /** Dev only: save every POST /explain request (question, page map, screenshot) and answer here for the "show me" eval. Unset = nothing kept. */
   EVAL_CAPTURE_DIR: z.string().optional(),
   NEWS_API_KEY: z.string().optional(),
+  /** Birdeye (data.birdeye.so): on-chain volume, liquidity, holders and the price path behind the card's chart. Empty → the card shows price only. */
+  BIRD_EYE_API_KEY: z.string().optional(),
   /** Fish Audio text-to-speech for the bubble's voice (spec §7.1). Empty → the extension uses the browser's local voice. */
   FISH_AUDIO_API_KEY: z.string().optional(),
   /** Fish Audio voice model id. Default: the official "Ethan" voice. */
