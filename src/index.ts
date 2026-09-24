@@ -10,6 +10,7 @@ import { agentKeypair, deskKeypair } from "./services/keys.js";
 import { authPrivateRoutes, authPublicRoutes } from "./routes/auth.js";
 import { routeProvider } from "./services/route.js";
 import { sampleAllPrices } from "./services/prices.js";
+import { ttsEnabled } from "./services/tts.js";
 import glanceRoutes from "./routes/glance.js";
 import tradeRoutes from "./routes/trade.js";
 import sessionRoutes from "./routes/session.js";
@@ -68,6 +69,8 @@ app.get("/health", (c) => {
     vaultProgram: env.VAULT_PROGRAM_ID,
     agent: agentKeypair().publicKey.toBase58(),
     console: env.WEB_CONSOLE_URL,
+    // The Fish model when a key is set, false when the extension will fall back to the browser voice.
+    voice: ttsEnabled() ? env.FISH_AUDIO_MODEL : false,
   });
 });
 

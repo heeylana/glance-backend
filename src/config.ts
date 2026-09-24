@@ -82,8 +82,8 @@ const Env = z.object({
   BIRD_EYE_API_KEY: z.string().optional(),
   /** Fish Audio text-to-speech for the bubble's voice (spec §7.1). Empty → the extension uses the browser's local voice. */
   FISH_AUDIO_API_KEY: z.string().optional(),
-  /** Fish Audio voice model id. Default: the official "Ethan" voice. */
-  FISH_AUDIO_VOICE_ID: z.string().default("536d3a5e000945adb7038665781a4aca"),
+  /** Fish Audio voice model id. Default: "Soft male" (public). */
+  FISH_AUDIO_VOICE_ID: z.string().default("2e1a1356e3074aa59d92fafde0fdcbff"),
   FISH_AUDIO_MODEL: z.string().default("s2.1-pro-free"),
 });
 

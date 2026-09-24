@@ -1,5 +1,5 @@
 /**
- * Voice out (spec §7.1): the bubble's spoken line, synthesized by Fish Audio with the "Ethan" voice
+ * Voice out (spec §7.1): the bubble's spoken line, synthesized by Fish Audio with the "Soft male" voice
  * and streamed back to the extension as MP3. The lines repeat a lot ("Glance is paused."), so a
  * small in-memory cache keyed by the text keeps the common ones instant. Without a key this returns
  * null and the extension falls back to the browser's own voice.
