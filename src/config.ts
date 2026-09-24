@@ -84,7 +84,7 @@ const Env = z.object({
   FISH_AUDIO_API_KEY: z.string().optional(),
   /** Fish Audio voice model id. Default: the official "Ethan" voice. */
   FISH_AUDIO_VOICE_ID: z.string().default("536d3a5e000945adb7038665781a4aca"),
-  FISH_AUDIO_MODEL: z.string().default("s1"),
+  FISH_AUDIO_MODEL: z.string().default("s2.1-pro-free"),
 });
 
 export type Env = z.infer<typeof Env>;
