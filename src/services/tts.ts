@@ -19,6 +19,12 @@ const FISH_TTS = "https://api.fish.audio/v1/tts";
 const CACHE_MAX = 200;
 const cache = new Map<string, { bytes: Buffer; mime: string }>();
 
+/** The last call to Fish, for /health: a deploy with a key Fish refuses otherwise only shows as the browser voice. */
+export const lastTts: { at: string | null; ok: boolean | null; status: number | null; reason: string | null } = { at: null, ok: null, status: null, reason: null };
+function noteTts(ok: boolean, status: number | null, reason: string | null) {
+  Object.assign(lastTts, { at: new Date().toISOString(), ok, status, reason });
+}
+
 /** Collapse whitespace, soften the em dash the copy uses, and cap the length. */
 export function normalizeSpeech(text: string): string {
   const line = text.replace(/\s*[—–]\s*/g, ", ").replace(/\s+/g, " ").trim();
@@ -57,17 +63,24 @@ export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: s
       signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) {
-      log.warn("tts failed", { status: res.status, body: (await res.text().catch(() => "")).slice(0, 200) });
+      const reason = (await res.text().catch(() => "")).slice(0, 200);
+      log.warn("tts failed", { status: res.status, body: reason });
+      noteTts(false, res.status, reason);
       return null;
     }
     const bytes = Buffer.from(await res.arrayBuffer());
     const mime = res.headers.get("content-type")?.split(";")[0] || "audio/mpeg";
-    if (bytes.length === 0) return null;
+    if (bytes.length === 0) {
+      noteTts(false, res.status, "empty audio");
+      return null;
+    }
+    noteTts(true, res.status, null);
     cache.set(key, { bytes, mime });
     if (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value!);
     return { bytes, mime, cached: false };
   } catch (e) {
     log.warn("tts failed", { err: String(e) });
+    noteTts(false, null, String(e).slice(0, 200));
     return null;
   }
 }
