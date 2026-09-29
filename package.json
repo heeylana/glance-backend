@@ -21,7 +21,8 @@
     "script:cache-probe": "tsx src/scripts/cache-probe.ts",
     "script:score-voice": "tsx src/scripts/score-voice.ts",
     "script:compare-news": "tsx src/scripts/compare-news.ts",
-    "script:replay-explain": "tsx src/scripts/replay-explain.ts"
+    "script:replay-explain": "tsx src/scripts/replay-explain.ts",
+    "script:harvest-mocks": "tsx src/scripts/harvest-mocks.ts"
   },
   "license": "ISC",
   "devEngines": {

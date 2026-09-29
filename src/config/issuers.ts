@@ -94,8 +94,11 @@ export interface IssuerRegistry {
 const here = dirname(fileURLToPath(import.meta.url));
 export const CATALOG_FILE = join(here, "catalog.json");
 
+/** The registry shipped with the code (committed). */
+export const bundledRegistryPath = (mode = env.ISSUER_MODE) => join(here, mode === "mock" ? "issuers.mock.json" : "issuers.mainnet.json");
+
 export function registryPath(mode = env.ISSUER_MODE): string {
-  const bundled = join(here, mode === "mock" ? "issuers.mock.json" : "issuers.mainnet.json");
+  const bundled = bundledRegistryPath(mode);
   const file = mode === "mock" ? env.ISSUER_REGISTRY_FILE : undefined;
   if (!file) return bundled;
   // A fresh volume starts from the registry shipped with the code, then keeps the mocks made on it.
@@ -117,10 +120,24 @@ export function loadCatalog(): MintEntry[] {
 }
 const norm = (id: string | undefined) => id?.replace(/^0x/, "").toLowerCase();
 
+/**
+ * The live mock registry plus every committed mock it lacks. A volume is seeded from the committed file
+ * only once, so mocks committed later (harvested from a deploy) would otherwise never reach it. Additive
+ * only: a mint the live file has is kept as it is, and nothing is removed, since a dropped mint is a
+ * position the user can no longer see or sell.
+ */
+export function withCommittedMocks<T extends { mints: Record<string, unknown> }>(live: T, committed: { mints: Record<string, unknown> }): T {
+  const missing = Object.keys(committed.mints).filter((m) => !(m in live.mints));
+  if (missing.length === 0) return live;
+  return { ...live, mints: { ...live.mints, ...Object.fromEntries(missing.map((m) => [m, committed.mints[m]])) } };
+}
+
 export function loadRegistry(force = false): IssuerRegistry {
   if (cached && !force) return cached;
   const file = registryPath();
-  const raw = Registry.parse(JSON.parse(readFileSync(file, "utf8")));
+  let raw = Registry.parse(JSON.parse(readFileSync(file, "utf8")));
+  const bundled = bundledRegistryPath();
+  if (env.ISSUER_MODE === "mock" && file !== bundled) raw = withCommittedMocks(raw, Registry.parse(JSON.parse(readFileSync(bundled, "utf8"))));
   const listings = new Map(loadCatalog().map((l) => [l.mint, l]));
 
   const byMint = new Map<string, MintEntry>();

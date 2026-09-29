@@ -79,6 +79,46 @@
       "tokenProgram": "token-2022",
       "referenceMint": "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN",
       "issuerDelegate": "AqCFNAyNgMfmCyRnmWtPWvLKvL4sgzUEhggFjyzCeFPW"
+    },
+    "7WNqKWdZXc22zoamzsRGS2mmhAcZGfFuNrfdo2uyARRy": {
+      "ticker": "SPCX",
+      "issuer": "xStocks",
+      "decimals": 8,
+      "tokenProgram": "token-2022",
+      "referenceMint": "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8",
+      "issuerDelegate": "AqCFNAyNgMfmCyRnmWtPWvLKvL4sgzUEhggFjyzCeFPW"
+    },
+    "8EiKFdT7M82etMyjzWHSwiWoTCkdVMTY8zNF41wtzoLo": {
+      "ticker": "ANDURIL",
+      "issuer": "PreStocks",
+      "decimals": 9,
+      "tokenProgram": "token-2022",
+      "referenceMint": "PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB",
+      "issuerDelegate": "AqCFNAyNgMfmCyRnmWtPWvLKvL4sgzUEhggFjyzCeFPW"
+    },
+    "7BFtjqbzvg98C65TQbZEXq6zbkSQVgCYFmJunEfLgVvh": {
+      "ticker": "ANTHROPIC",
+      "issuer": "PreStocks",
+      "decimals": 9,
+      "tokenProgram": "token-2022",
+      "referenceMint": "Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw",
+      "issuerDelegate": "AqCFNAyNgMfmCyRnmWtPWvLKvL4sgzUEhggFjyzCeFPW"
+    },
+    "FBxNoaTroshGZ7FjsUBL4WHHd7fVNX1gayrkHxiH5PNQ": {
+      "ticker": "NEURALINK",
+      "issuer": "PreStocks",
+      "decimals": 9,
+      "tokenProgram": "token-2022",
+      "referenceMint": "PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S",
+      "issuerDelegate": "AqCFNAyNgMfmCyRnmWtPWvLKvL4sgzUEhggFjyzCeFPW"
+    },
+    "BhWELS11A19t2EHihEPbfXmpSW3J2v9gBEifP2w4rCgr": {
+      "ticker": "META",
+      "issuer": "xStocks",
+      "decimals": 8,
+      "tokenProgram": "token-2022",
+      "referenceMint": "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu",
+      "issuerDelegate": "AqCFNAyNgMfmCyRnmWtPWvLKvL4sgzUEhggFjyzCeFPW"
     }
   }
 }

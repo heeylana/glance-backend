@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { Keypair } from "@solana/web3.js";
 import { describe, expect, it } from "vitest";
 import { env } from "../config.js";
-import { registryPath } from "../config/issuers.js";
+import { bundledRegistryPath, loadRegistry, registryPath, withCommittedMocks } from "../config/issuers.js";
 import { loadKeypair } from "./keys.js";
 
 const dir = mkdtempSync(join(tmpdir(), "glance-keys-"));
@@ -43,6 +43,47 @@ describe("registryPath", () => {
       expect(registryPath("registry")).not.toBe(file);
     } finally {
       env.ISSUER_REGISTRY_FILE = undefined;
+    }
+  });
+});
+
+describe("withCommittedMocks", () => {
+  const live = { stableMints: ["USDC"], mints: { A: { ticker: "AAPL", v: "live" }, R: { ticker: "META", v: "runtime" } } };
+  const committed = { mints: { A: { ticker: "AAPL", v: "committed" }, H: { ticker: "META", v: "harvested" } } };
+
+  it("adds committed mocks the live file lacks, and never overwrites or drops a live one", () => {
+    const merged = withCommittedMocks(live, committed);
+    expect(merged.mints).toEqual({ A: { ticker: "AAPL", v: "live" }, R: { ticker: "META", v: "runtime" }, H: { ticker: "META", v: "harvested" } });
+    expect(merged.stableMints).toEqual(["USDC"]);
+  });
+
+  it("returns the live registry untouched when nothing is missing", () => {
+    expect(withCommittedMocks(live, { mints: { A: {} } })).toBe(live);
+  });
+});
+
+describe("loadRegistry with a volume", () => {
+  it("sees mocks committed after the volume was seeded, and keeps the ones made on the volume", () => {
+    const committed = JSON.parse(readFileSync(bundledRegistryPath("mock"), "utf8")) as { mints: Record<string, unknown> };
+    const [dropped, ...kept] = Object.keys(committed.mints);
+    const file = join(dir, "old-volume", "issuers.mock.json");
+    env.ISSUER_REGISTRY_FILE = file;
+    try {
+      registryPath("mock"); // seeds the volume
+      const onVolume = JSON.parse(readFileSync(file, "utf8")) as { mints: Record<string, unknown> };
+      // An old volume: seeded before `dropped` was committed, with one mock made on it since.
+      delete onVolume.mints[dropped!];
+      onVolume.mints["RuntimeMock1111111111111111111111111111111"] = { ticker: "META", issuer: "xStocks", decimals: 8, tokenProgram: "token-2022", referenceMint: "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu", issuerDelegate: null };
+      writeFileSync(file, JSON.stringify(onVolume));
+      const reg = loadRegistry(true);
+      expect(reg.byMint.has(dropped!)).toBe(true);
+      expect(reg.byMint.has("RuntimeMock1111111111111111111111111111111")).toBe(true);
+      for (const m of kept) expect(reg.byMint.has(m)).toBe(true);
+      // Merged in memory only: the volume file is left as it was.
+      expect(JSON.parse(readFileSync(file, "utf8")).mints[dropped!]).toBeUndefined();
+    } finally {
+      env.ISSUER_REGISTRY_FILE = undefined;
+      loadRegistry(true);
     }
   });
 });
