@@ -1,18 +1,26 @@
 /**
- * Voice in (spec §7.4): push-to-talk audio to text with Fish Audio's ASR, the same vendor and key as
- * the voice out. The extension records 16 kHz mono WAV, because Fish rejects the WebM that
- * MediaRecorder produces. The audio is transcribed once and dropped; neither it nor the transcript is
- * stored or logged.
+ * Voice in (spec §7.4): push-to-talk audio to text. Deepgram's nova-3 hears it when DEEPGRAM_API_KEY is
+ * set (services/deepgram.ts, with `keyterm` prompting for the names Glance deals in), and Fish Audio's
+ * ASR stays behind it as the fallback. The extension records 16 kHz mono WAV, because Fish rejects the
+ * WebM that MediaRecorder produces, and Deepgram takes the same WAV. The audio is transcribed once and
+ * dropped; neither it nor the transcript is stored or logged.
  */
 import { env } from "../config.js";
 import { log } from "../lib/log.js";
+import { deepgramReady, listen as deepgramListen } from "./deepgram.js";
 
 const FISH_ASR = "https://api.fish.audio/v1/asr";
 /** ~45 s of 16 kHz mono 16-bit PCM; the extension stops recording at 30 s. */
 export const STT_MAX_BYTES = 1_500_000;
 
 export function sttEnabled(): boolean {
-  return !!env.FISH_AUDIO_API_KEY;
+  return !!(env.DEEPGRAM_API_KEY || env.FISH_AUDIO_API_KEY);
+}
+
+/** Who listens: Deepgram when it has a key (it answered in well under a second where Fish took 3.3s), else Fish. */
+export function sttProvider(): string | null {
+  if (deepgramReady()) return `deepgram ${env.DEEPGRAM_STT_MODEL}`;
+  return env.FISH_AUDIO_API_KEY ? "fish asr" : null;
 }
 
 /** Decode the extension's `data:audio/wav;base64,…` upload; null unless it is a RIFF/WAVE file of sane size. */
@@ -26,7 +34,13 @@ export function decodeWavDataUrl(dataUrl: string): Uint8Array<ArrayBuffer> | nul
 }
 
 export async function transcribe(wav: Uint8Array<ArrayBuffer>): Promise<string | null> {
-  if (!env.FISH_AUDIO_API_KEY) return null;
+  if (!sttEnabled()) return null;
+  // Deepgram first when it is configured; Fish still gets its turn below if Deepgram declines.
+  if (deepgramReady()) {
+    const heard = await deepgramListen(wav);
+    if (heard) return heard;
+    if (!env.FISH_AUDIO_API_KEY) return null;
+  }
   const send = () => {
     const form = new FormData();
     form.append("audio", new Blob([wav], { type: "audio/wav" }), "speech.wav");

@@ -85,6 +85,19 @@ const Env = z.object({
   /** Fish Audio voice model id. Default: "Soft male" (public). */
   FISH_AUDIO_VOICE_ID: z.string().default("2e1a1356e3074aa59d92fafde0fdcbff"),
   FISH_AUDIO_MODEL: z.string().default("s2.1-pro-free"),
+  /**
+   * Deepgram (developers.deepgram.com), one key for both directions of voice and the fast path for both.
+   * Empty → Fish Audio serves voice on its own, as before.
+   */
+  DEEPGRAM_API_KEY: z.string().optional(),
+  /**
+   * The voice of the bubble when Deepgram is configured; the prefix picks the endpoint. Default Aura-2
+   * "Apollo" (aura-2-apollo-en: American, male, confident and comfortable), the Aura-2 voice closest to the
+   * Fish "Soft male" it replaces. Flux voices (flux-sienna-en) go to /v2/speak.
+   */
+  DEEPGRAM_TTS_VOICE: z.string().default("aura-2-apollo-en"),
+  /** Deepgram speech-to-text model. nova-3 is the one that takes `keyterm` prompting. */
+  DEEPGRAM_STT_MODEL: z.string().default("nova-3"),
 });
 
 export type Env = z.infer<typeof Env>;

@@ -1,13 +1,16 @@
 /**
- * Voice out (spec §7.1): the bubble's spoken line, synthesized by Fish Audio with the "Soft male" voice
- * and streamed back to the extension as MP3. The lines repeat a lot ("Glance is paused."), so a
- * small in-memory cache keyed by the text keeps the common ones instant. Without a key this returns
- * null and the extension falls back to the browser's own voice.
+ * Voice out (spec §7.1): the bubble's spoken line, synthesized and sent back to the extension as MP3.
+ * Deepgram speaks it when DEEPGRAM_API_KEY is set (services/deepgram.ts: under a second a line, where
+ * Fish's free tier took six to ten), and Fish Audio's "Soft male" stays behind it as the fallback. The
+ * lines repeat a lot ("Glance is paused."), so a small in-memory cache keyed by the text and the voice
+ * keeps the common ones instant. With neither key this returns null and the panel shows the text in
+ * silence, which is what the extension now does instead of using the browser's own voice.
  */
 import { createHash } from "node:crypto";
 import { Agent, request } from "node:https";
 import { env } from "../config.js";
 import { log } from "../lib/log.js";
+import { deepgramReady, speak as deepgramSpeak } from "./deepgram.js";
 
 /**
  * A spoken line's ceiling. It was 400, which silently dropped the four-part read (services/advice.ts,
@@ -44,10 +47,25 @@ function postFish(body: string, headers: Record<string, string>, signal: AbortSi
   });
 }
 
-/** The last call to Fish, for /health: a deploy with a key Fish refuses otherwise only shows as the browser voice. */
-export const lastTts: { at: string | null; ok: boolean | null; status: number | null; reason: string | null } = { at: null, ok: null, status: null, reason: null };
-function noteTts(ok: boolean, status: number | null, reason: string | null) {
-  Object.assign(lastTts, { at: new Date().toISOString(), ok, status, reason });
+/** The last synthesis, for /health: a deploy with a key the provider refuses otherwise only shows as silence. */
+export const lastTts: { at: string | null; ok: boolean | null; status: number | null; reason: string | null; provider: string | null } = {
+  at: null,
+  ok: null,
+  status: null,
+  reason: null,
+  provider: null,
+};
+function noteTts(ok: boolean, status: number | null, reason: string | null, provider: string | null = null) {
+  Object.assign(lastTts, { at: new Date().toISOString(), ok, status, reason, provider });
+}
+
+/**
+ * Who speaks: Deepgram when it has a key, Fish otherwise. Deepgram answers a short line in well under a
+ * second where Fish's free tier took six to ten, so it goes first and Fish stays behind it as the fallback.
+ */
+export function ttsProvider(): string | null {
+  if (deepgramReady()) return `deepgram ${env.DEEPGRAM_TTS_VOICE}`;
+  return env.FISH_AUDIO_API_KEY ? `fish ${env.FISH_AUDIO_MODEL}` : null;
 }
 
 /** Collapse whitespace, soften the em dash the copy uses, and cap the length. */
@@ -62,15 +80,17 @@ export function normalizeSpeech(text: string): string {
 }
 
 export function ttsKey(text: string): string {
-  return createHash("sha256").update(`${env.FISH_AUDIO_VOICE_ID}|${env.FISH_AUDIO_MODEL}|${normalizeSpeech(text).toLowerCase()}`).digest("hex");
+  // The voice is part of the key: change provider or voice and every cached line is synthesized again
+  // rather than the panel playing yesterday's voice back.
+  return createHash("sha256").update(`${ttsProvider() ?? "none"}|${env.FISH_AUDIO_VOICE_ID}|${normalizeSpeech(text).toLowerCase()}`).digest("hex");
 }
 
 export function ttsEnabled(): boolean {
-  return !!env.FISH_AUDIO_API_KEY;
+  return !!(env.DEEPGRAM_API_KEY || env.FISH_AUDIO_API_KEY);
 }
 
 export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: string; cached: boolean } | null> {
-  if (!env.FISH_AUDIO_API_KEY) return null;
+  if (!ttsEnabled()) return null;
   const line = normalizeSpeech(text);
   if (!line) return null;
   const key = ttsKey(line);
@@ -79,6 +99,19 @@ export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: s
     cache.delete(key);
     cache.set(key, hit); // most recently used last
     return { ...hit, cached: true };
+  }
+  // Deepgram first when it is configured; on any failure Fish still gets its turn below, so one provider
+  // refusing a key never costs the user the spoken line.
+  if (deepgramReady()) {
+    const dg = await deepgramSpeak(line);
+    if (dg) {
+      noteTts(true, dg.status, null, "deepgram");
+      cache.set(key, { bytes: dg.bytes, mime: dg.mime });
+      if (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value!);
+      return { bytes: dg.bytes, mime: dg.mime, cached: false };
+    }
+    noteTts(false, null, "deepgram declined", "deepgram");
+    if (!env.FISH_AUDIO_API_KEY) return null;
   }
   try {
     const res = await postFish(
@@ -89,7 +122,7 @@ export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: s
     if (!res.ok) {
       const reason = res.bytes.toString("utf8").slice(0, 200);
       log.warn("tts failed", { status: res.status, body: reason });
-      noteTts(false, res.status, reason);
+      noteTts(false, res.status, reason, "fish");
       return null;
     }
     const bytes = res.bytes;
@@ -98,13 +131,13 @@ export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: s
       noteTts(false, res.status, "empty audio");
       return null;
     }
-    noteTts(true, res.status, null);
+    noteTts(true, res.status, null, "fish");
     cache.set(key, { bytes, mime });
     if (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value!);
     return { bytes, mime, cached: false };
   } catch (e) {
     log.warn("tts failed", { err: String(e) });
-    noteTts(false, null, String(e).slice(0, 200));
+    noteTts(false, null, String(e).slice(0, 200), "fish");
     return null;
   }
 }
@@ -142,7 +175,7 @@ export async function warmTts(lines: readonly string[] = WARM_LINES): Promise<{ 
       warmed++;
       continue;
     }
-    // Fish is down or refusing the key: the rest would fail the same way, so stop asking.
+    // The provider is down or refusing the key: the rest would fail the same way, so stop asking.
     failed.push(...lines.slice(i));
     break;
   }

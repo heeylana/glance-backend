@@ -10,7 +10,8 @@ import { agentKeypair, deskKeypair } from "./services/keys.js";
 import { authPrivateRoutes, authPublicRoutes } from "./routes/auth.js";
 import { routeProvider } from "./services/route.js";
 import { sampleAllPrices } from "./services/prices.js";
-import { lastTts, ttsEnabled, warmTts } from "./services/tts.js";
+import { lastTts, ttsEnabled, ttsProvider, warmTts } from "./services/tts.js";
+import { sttProvider } from "./services/stt.js";
 import glanceRoutes from "./routes/glance.js";
 import tradeRoutes from "./routes/trade.js";
 import sessionRoutes from "./routes/session.js";
@@ -69,8 +70,9 @@ app.get("/health", (c) => {
     vaultProgram: env.VAULT_PROGRAM_ID,
     agent: agentKeypair().publicKey.toBase58(),
     console: env.WEB_CONSOLE_URL,
-    // The Fish model when a key is set, false when the extension will fall back to the browser voice.
-    voice: ttsEnabled() ? env.FISH_AUDIO_MODEL : false,
+    // Which provider and voice will speak, false when no key is set and the panel shows text in silence.
+    voice: ttsEnabled() ? ttsProvider() : false,
+    hearing: sttProvider() ?? false,
     lastTts,
   });
 });
