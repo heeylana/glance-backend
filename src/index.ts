@@ -10,7 +10,7 @@ import { agentKeypair, deskKeypair } from "./services/keys.js";
 import { authPrivateRoutes, authPublicRoutes } from "./routes/auth.js";
 import { routeProvider } from "./services/route.js";
 import { sampleAllPrices } from "./services/prices.js";
-import { lastTts, ttsEnabled } from "./services/tts.js";
+import { lastTts, ttsEnabled, warmTts } from "./services/tts.js";
 import glanceRoutes from "./routes/glance.js";
 import tradeRoutes from "./routes/trade.js";
 import sessionRoutes from "./routes/session.js";
@@ -140,6 +140,13 @@ if (process.env.NODE_ENV !== "test") {
       .catch((e) => log.warn("price sampling failed", { err: String(e) }));
   setTimeout(sample, 5_000);
   setInterval(sample, 3_600_000).unref();
+  // The fixed spoken lines, in the background: boot never waits on Fish, and a failure only means a cold first call.
+  if (ttsEnabled())
+    setTimeout(() => {
+      warmTts()
+        .then((r) => log.info("tts warmed", { warmed: r.warmed, failed: r.failed.length }))
+        .catch((e) => log.warn("tts warming failed", { err: String(e) }));
+    }, 1_000).unref();
 }
 
 export default app;

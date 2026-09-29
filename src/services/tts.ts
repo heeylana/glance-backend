@@ -5,6 +5,7 @@
  * null and the extension falls back to the browser's own voice.
  */
 import { createHash } from "node:crypto";
+import { Agent, request } from "node:https";
 import { env } from "../config.js";
 import { log } from "../lib/log.js";
 
@@ -18,6 +19,30 @@ export const TTS_MAX_CHARS = 1_000;
 const FISH_TTS = "https://api.fish.audio/v1/tts";
 const CACHE_MAX = 200;
 const cache = new Map<string, { bytes: Buffer; mime: string }>();
+
+/**
+ * Fish is far from Lagos, so a fresh TLS handshake per line costs more than the synthesis of a short
+ * one. This agent keeps the connection open between lines. It is used only for Fish here; the rest of
+ * the backend keeps the global fetch.
+ */
+const fishAgent = new Agent({ keepAlive: true, keepAliveMsecs: 15_000, maxSockets: 8, maxFreeSockets: 4, timeout: 60_000 });
+
+/** One POST to Fish over the kept-alive agent: status, content type and the whole body. */
+function postFish(body: string, headers: Record<string, string>, signal: AbortSignal): Promise<{ ok: boolean; status: number; mime: string | null; bytes: Buffer }> {
+  return new Promise((resolve, reject) => {
+    const req = request(FISH_TTS, { method: "POST", agent: fishAgent, headers: { ...headers, "content-length": String(Buffer.byteLength(body)) }, signal }, (res) => {
+      const chunks: Buffer[] = [];
+      res.on("data", (c: Buffer) => chunks.push(c));
+      res.on("end", () => {
+        const status = res.statusCode ?? 0;
+        resolve({ ok: status >= 200 && status < 300, status, mime: res.headers["content-type"] ?? null, bytes: Buffer.concat(chunks) });
+      });
+      res.on("error", reject);
+    });
+    req.on("error", reject);
+    req.end(body);
+  });
+}
 
 /** The last call to Fish, for /health: a deploy with a key Fish refuses otherwise only shows as the browser voice. */
 export const lastTts: { at: string | null; ok: boolean | null; status: number | null; reason: string | null } = { at: null, ok: null, status: null, reason: null };
@@ -56,20 +81,19 @@ export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: s
     return { ...hit, cached: true };
   }
   try {
-    const res = await fetch(FISH_TTS, {
-      method: "POST",
-      headers: { authorization: `Bearer ${env.FISH_AUDIO_API_KEY}`, "content-type": "application/json", model: env.FISH_AUDIO_MODEL },
-      body: JSON.stringify({ text: line, reference_id: env.FISH_AUDIO_VOICE_ID, format: "mp3", mp3_bitrate: 64, latency: "balanced" }),
-      signal: AbortSignal.timeout(15_000),
-    });
+    const res = await postFish(
+      JSON.stringify({ text: line, reference_id: env.FISH_AUDIO_VOICE_ID, format: "mp3", mp3_bitrate: 64, latency: "balanced" }),
+      { authorization: `Bearer ${env.FISH_AUDIO_API_KEY}`, "content-type": "application/json", model: env.FISH_AUDIO_MODEL },
+      AbortSignal.timeout(15_000),
+    );
     if (!res.ok) {
-      const reason = (await res.text().catch(() => "")).slice(0, 200);
+      const reason = res.bytes.toString("utf8").slice(0, 200);
       log.warn("tts failed", { status: res.status, body: reason });
       noteTts(false, res.status, reason);
       return null;
     }
-    const bytes = Buffer.from(await res.arrayBuffer());
-    const mime = res.headers.get("content-type")?.split(";")[0] || "audio/mpeg";
+    const bytes = res.bytes;
+    const mime = res.mime?.split(";")[0] || "audio/mpeg";
     if (bytes.length === 0) {
       noteTts(false, res.status, "empty audio");
       return null;
@@ -83,4 +107,44 @@ export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: s
     noteTts(false, null, String(e).slice(0, 200));
     return null;
   }
+}
+
+/**
+ * Lines from the spec's fixed set that never vary, synthesized at boot so the first user to hear one
+ * doesn't wait on a cold Fish call. Only lines with no number or company name in them: those differ
+ * per user and would never hit. The greeting and the empty states are not here: their wording lives in
+ * the spec and the extension, not in this repo, and a guessed line would just be a wasted call.
+ */
+export const WARM_LINES: readonly string[] = [
+  "Glance is paused.",
+  "Glance needs a quick renewal to keep buying for you.",
+  "That didn't go through — nothing was spent. Try again?",
+  "I can't get a fair price right now. Try again in a moment?",
+  "Test money is running low. Ask the Glance team to top it up.",
+  "Please sign in to Glance again.",
+  "I can't hear you right now. Tap instead?",
+  "I can't walk you through this page right now. Try again in a moment?",
+  "I couldn't read this page well enough to remember it. Scroll to the story and try again?",
+  "That's more than Glance buys in one go. Try a smaller amount, or raise the limit in settings?",
+];
+
+/**
+ * Fill the cache with WARM_LINES, one at a time so a real user's line never queues behind a burst.
+ * Best effort: never throws, stops at the first failure, and a line it missed is synthesized on first use.
+ */
+export async function warmTts(lines: readonly string[] = WARM_LINES): Promise<{ warmed: number; failed: string[] }> {
+  const failed: string[] = [];
+  let warmed = 0;
+  if (!ttsEnabled()) return { warmed, failed };
+  for (const [i, line] of lines.entries()) {
+    const ok = await synthesize(line).catch(() => null);
+    if (ok) {
+      warmed++;
+      continue;
+    }
+    // Fish is down or refusing the key: the rest would fail the same way, so stop asking.
+    failed.push(...lines.slice(i));
+    break;
+  }
+  return { warmed, failed };
 }

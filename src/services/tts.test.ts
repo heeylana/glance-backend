@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { normalizeSpeech, ttsKey, TTS_MAX_CHARS } from "./tts.js";
+import { GuardCode, userMessage } from "../lib/errors.js";
+import { normalizeSpeech, ttsEnabled, ttsKey, TTS_MAX_CHARS, WARM_LINES, warmTts } from "./tts.js";
 
 describe("normalizeSpeech", () => {
   it("collapses whitespace and softens the em dash", () => {
@@ -36,5 +37,20 @@ describe("long spoken lines", () => {
     const said = normalizeSpeech(line);
     expect(said.length).toBeLessThanOrEqual(TTS_MAX_CHARS);
     expect(said.endsWith(".")).toBe(true);
+  });
+});
+
+describe("warm lines", () => {
+  it("never carry a number or a company name", () => {
+    for (const line of WARM_LINES) expect(line).not.toMatch(/[0-9$]|that company/);
+  });
+
+  it("are the lines the backend actually says, so the warmed cache is hit", () => {
+    const said = new Set(Object.values(GuardCode).map((c) => ttsKey(userMessage(c))));
+    for (const line of WARM_LINES) expect(said.has(ttsKey(line)), line).toBe(true);
+  });
+
+  it.skipIf(ttsEnabled())("warming never throws, and does nothing without a key", async () => {
+    await expect(warmTts()).resolves.toEqual({ warmed: 0, failed: [] });
   });
 });
