@@ -98,6 +98,31 @@ const PRIVATE: CompanySeed[] = [
   { id: "figureai", name: "Figure AI", ticker: "FIGUREAI", exchange: "PRIVATE", aliases: ["figure robotics"], products: ["figure 02", "figure 03", "helix vla"], execs: ["brett adcock"] },
   { id: "kalshi", name: "Kalshi", ticker: "KALSHI", exchange: "PRIVATE", aliases: [], products: [], execs: ["tarek mansour", "luana lopes lara"] },
   { id: "polymarket", name: "Polymarket", ticker: "POLYMARKET", exchange: "PRIVATE", aliases: [], products: [], execs: ["shayne coplan"] },
+
+  /**
+   * Private companies with no token behind them, and the reason they are here: without an entry, a page about one of
+   * them resolves to whichever company Glance does know that the article happens to mention. A Stripe story naming
+   * OpenAI as a customer resolved to OpenAI, confidently and wrongly, which is the worst answer Glance can give.
+   *
+   * With an entry, the ticker matches nothing in the issuer registry, so `tokenized` is false and the existing
+   * "waiting on the headline" path takes over (routes/watchlist.ts, spec §7.7): Glance names the right company, says
+   * it cannot be bought yet, and offers to say when it can. Being right and unable to trade beats being wrong.
+   *
+   * Names that are ordinary words ("stripe", "discord", "perplexity") carry ambiguousName, so a bare lower-case
+   * mention is not enough to fire. Executives shared with a listed company are left out: "elon musk" belongs to Tesla
+   * in this table, and giving him to xAI as well would make every Tesla story ambiguous.
+   */
+  { id: "stripe", name: "Stripe", ticker: "STRIPE", exchange: "PRIVATE", aliases: ["stripe inc"], products: ["stripe checkout", "stripe connect", "stripe atlas", "stripe radar", "stripe terminal"], execs: ["patrick collison", "john collison"], ambiguousName: true },
+  { id: "databricks", name: "Databricks", ticker: "DATABRICKS", exchange: "PRIVATE", aliases: [], products: ["mosaicml", "unity catalog", "delta lake"], execs: ["ali ghodsi"] },
+  { id: "xai", name: "xAI", ticker: "XAI", exchange: "PRIVATE", aliases: ["x ai"], products: ["grok", "colossus"], execs: [], ambiguousTicker: true },
+  { id: "bytedance", name: "ByteDance", ticker: "BYTEDANCE", exchange: "PRIVATE", aliases: [], products: ["tiktok", "douyin", "capcut"], execs: ["liang rubo", "zhang yiming"] },
+  { id: "canva", name: "Canva", ticker: "CANVA", exchange: "PRIVATE", aliases: [], products: ["canva magic studio"], execs: ["melanie perkins"] },
+  { id: "klarna", name: "Klarna", ticker: "KLARNA", exchange: "PRIVATE", aliases: [], products: [], execs: ["sebastian siemiatkowski"] },
+  { id: "epicgames", name: "Epic Games", ticker: "EPICGAMES", exchange: "PRIVATE", aliases: [], products: ["fortnite", "unreal engine"], execs: ["tim sweeney"] },
+  { id: "discord", name: "Discord", ticker: "DISCORD", exchange: "PRIVATE", aliases: [], products: [], execs: ["jason citron", "humam sakhnini"], ambiguousName: true },
+  { id: "perplexity", name: "Perplexity", ticker: "PERPLEXITY", exchange: "PRIVATE", aliases: ["perplexity ai"], products: ["comet browser"], execs: ["aravind srinivas"], ambiguousName: true },
+  { id: "mistral", name: "Mistral", ticker: "MISTRAL", exchange: "PRIVATE", aliases: ["mistral ai"], products: ["le chat"], execs: ["arthur mensch"], ambiguousName: true },
+  { id: "scaleai", name: "Scale AI", ticker: "SCALEAI", exchange: "PRIVATE", aliases: ["scale ai"], products: [], execs: [], ambiguousName: true },
 ];
 
 /** News acronyms that are also tickers: bare in caps they are almost never the company. */

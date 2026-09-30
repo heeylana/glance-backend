@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { alsoMentioned, CONFIDENT, decide, focusOn, matchText, wordCase } from "./match.js";
+import { alsoMentioned, CONFIDENT, decide, focusOn, matchText, WEAK, wordCase } from "./match.js";
 
 const top = (s: string) => matchText(s)[0];
 
@@ -178,5 +178,49 @@ describe("a page about one company that names others", () => {
   });
   it("offers nothing extra when the answer is not confident", () => {
     expect(alsoMentioned(cands, { kind: "none" })).toEqual([]);
+  });
+});
+
+describe("companies with no token behind them", () => {
+  /**
+   * The failure this guards against: Glance named the wrong company, confidently, on a page that was not about it.
+   * Without a Stripe entry the resolver could only see the companies the article mentioned in passing, and returned
+   * OpenAI and Amazon as chips to choose between. Naming the right company and saying it cannot be bought yet is a
+   * far better answer than offering to buy the wrong one.
+   */
+  const STRIPE_TITLE = "Stripe hits $106.5 billion valuation in employee share sale";
+  const STRIPE_PAGE = `${STRIPE_TITLE}
+
+Stripe, the payments company founded by Patrick and John Collison, said its latest tender offer valued the business at $106.5 billion. Stripe counts OpenAI and Amazon among its customers.`;
+
+  it("a page about an untokenized company resolves to that company, not to one it mentions", () => {
+    const v = decide(matchText(STRIPE_PAGE, { titleLength: STRIPE_TITLE.length }));
+    expect(v.kind).toBe("confident");
+    expect(v.kind === "confident" && v.top.company.ticker).toBe("STRIPE");
+  });
+
+  it("the companies it merely mentions are still ranked below it", () => {
+    const cands = matchText(STRIPE_PAGE, { titleLength: STRIPE_TITLE.length });
+    expect(cands[0]?.company.ticker).toBe("STRIPE");
+    expect(cands.slice(1).map((c) => c.company.ticker)).toContain("OPENAI");
+  });
+
+  it("the ones whose names are ordinary words stay too weak to answer with in plain prose", () => {
+    // These names behave exactly as the ambiguous names already in the table do (Circle, Oracle, Target): the match
+    // is made but stays under WEAK, so it never becomes an answer. What must not happen is it reaching the user.
+    for (const prose of ["a stripe of paint along the wall", "there was discord among the committee", "the mistral swept down the valley"]) {
+      const t = top(prose);
+      expect(t!.confidence, prose).toBeLessThan(WEAK);
+    }
+  });
+
+  it("but resolve on a proper name in a finance context", () => {
+    expect(top("Discord raised at a higher valuation this week")?.company.ticker).toBe("DISCORD");
+    expect(top("Databricks buys another startup")?.company.ticker).toBe("DATABRICKS");
+  });
+
+  it("resolves a private company by its product", () => {
+    expect(top("Fortnite is getting a new season")?.company.ticker).toBe("EPICGAMES");
+    expect(top("Grok just shipped a new model")?.company.ticker).toBe("XAI");
   });
 });
