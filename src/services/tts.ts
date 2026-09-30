@@ -149,6 +149,11 @@ export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: s
  * the spec and the extension, not in this repo, and a guessed line would just be a wasted call.
  */
 export const WARM_LINES: readonly string[] = [
+  // Said the moment the user stops talking, while the answer is still being worked out (the extension's ACK_LINES).
+  // These are the most-heard lines in the product, so they are the ones that must never wait on the provider.
+  "One moment.",
+  "Let me look.",
+  "On it.",
   "Glance is paused.",
   "Glance needs a quick renewal to keep buying for you.",
   "That didn't go through — nothing was spent. Try again?",
