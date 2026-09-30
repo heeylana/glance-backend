@@ -22,6 +22,12 @@ export interface CompanySeed {
   ambiguousName?: boolean;
   /** The ticker is also a word or a news acronym ("NOW", "AI"): a bare mention is weak. */
   ambiguousTicker?: boolean;
+  /**
+   * One plain line saying what the company does. Only private companies carry it, and only because their card has
+   * nothing else on it: a tokenized company's card shows a price, a chart and its tokens, while a company Glance
+   * cannot trade would otherwise be a name and two buttons. Kept to a single factual clause.
+   */
+  blurb?: string;
 }
 
 const CURATED: CompanySeed[] = [
@@ -90,14 +96,14 @@ const CURATED: CompanySeed[] = [
  * SpaceX has since listed, so it uses its public ticker and its pre-IPO tokens group under it.
  */
 const PRIVATE: CompanySeed[] = [
-  { id: "openai", name: "OpenAI", ticker: "OPENAI", exchange: "PRIVATE", aliases: ["open ai"], products: ["chatgpt", "gpt 5", "gpt 4o", "gpt 4", "sora", "dall e", "openai o3"], execs: ["sam altman", "greg brockman", "fidji simo"] },
-  { id: "anthropic", name: "Anthropic", ticker: "ANTHROPIC", exchange: "PRIVATE", aliases: ["anthropic pbc"], products: ["claude", "claude code", "claude opus", "claude sonnet", "claude haiku"], execs: ["dario amodei", "daniela amodei"] },
+  { id: "openai", name: "OpenAI", ticker: "OPENAI", exchange: "PRIVATE", aliases: ["open ai"], products: ["chatgpt", "gpt 5", "gpt 4o", "gpt 4", "sora", "dall e", "openai o3"], execs: ["sam altman", "greg brockman", "fidji simo"], blurb: "The lab behind ChatGPT." },
+  { id: "anthropic", name: "Anthropic", ticker: "ANTHROPIC", exchange: "PRIVATE", aliases: ["anthropic pbc"], products: ["claude", "claude code", "claude opus", "claude sonnet", "claude haiku"], execs: ["dario amodei", "daniela amodei"], blurb: "The lab behind Claude." },
   { id: "spcx", name: "SpaceX", ticker: "SPCX", exchange: "LISTED", aliases: ["space x", "space exploration technologies"], products: ["starlink", "starship", "falcon 9", "falcon heavy", "crew dragon", "starbase"], execs: ["gwynne shotwell"] },
-  { id: "anduril", name: "Anduril", ticker: "ANDURIL", exchange: "PRIVATE", aliases: ["anduril industries"], products: ["roadrunner", "ghost shark", "altius"], execs: ["palmer luckey", "brian schimpf"] },
-  { id: "neuralink", name: "Neuralink", ticker: "NEURALINK", exchange: "PRIVATE", aliases: [], products: ["blindsight", "telepathy implant"], execs: [] },
-  { id: "figureai", name: "Figure AI", ticker: "FIGUREAI", exchange: "PRIVATE", aliases: ["figure robotics"], products: ["figure 02", "figure 03", "helix vla"], execs: ["brett adcock"] },
-  { id: "kalshi", name: "Kalshi", ticker: "KALSHI", exchange: "PRIVATE", aliases: [], products: [], execs: ["tarek mansour", "luana lopes lara"] },
-  { id: "polymarket", name: "Polymarket", ticker: "POLYMARKET", exchange: "PRIVATE", aliases: [], products: [], execs: ["shayne coplan"] },
+  { id: "anduril", name: "Anduril", ticker: "ANDURIL", exchange: "PRIVATE", aliases: ["anduril industries"], products: ["roadrunner", "ghost shark", "altius"], execs: ["palmer luckey", "brian schimpf"], blurb: "Defence hardware and autonomous systems." },
+  { id: "neuralink", name: "Neuralink", ticker: "NEURALINK", exchange: "PRIVATE", aliases: [], products: ["blindsight", "telepathy implant"], execs: [], blurb: "Brain-computer implants." },
+  { id: "figureai", name: "Figure AI", ticker: "FIGUREAI", exchange: "PRIVATE", aliases: ["figure robotics"], products: ["figure 02", "figure 03", "helix vla"], execs: ["brett adcock"], blurb: "Humanoid robots." },
+  { id: "kalshi", name: "Kalshi", ticker: "KALSHI", exchange: "PRIVATE", aliases: [], products: [], execs: ["tarek mansour", "luana lopes lara"], blurb: "A regulated prediction market." },
+  { id: "polymarket", name: "Polymarket", ticker: "POLYMARKET", exchange: "PRIVATE", aliases: [], products: [], execs: ["shayne coplan"], blurb: "A prediction market." },
 
   /**
    * Private companies with no token behind them, and the reason they are here: without an entry, a page about one of
@@ -112,17 +118,17 @@ const PRIVATE: CompanySeed[] = [
    * mention is not enough to fire. Executives shared with a listed company are left out: "elon musk" belongs to Tesla
    * in this table, and giving him to xAI as well would make every Tesla story ambiguous.
    */
-  { id: "stripe", name: "Stripe", ticker: "STRIPE", exchange: "PRIVATE", aliases: ["stripe inc"], products: ["stripe checkout", "stripe connect", "stripe atlas", "stripe radar", "stripe terminal"], execs: ["patrick collison", "john collison"], ambiguousName: true },
-  { id: "databricks", name: "Databricks", ticker: "DATABRICKS", exchange: "PRIVATE", aliases: [], products: ["mosaicml", "unity catalog", "delta lake"], execs: ["ali ghodsi"] },
-  { id: "xai", name: "xAI", ticker: "XAI", exchange: "PRIVATE", aliases: ["x ai"], products: ["grok", "colossus"], execs: [], ambiguousTicker: true },
-  { id: "bytedance", name: "ByteDance", ticker: "BYTEDANCE", exchange: "PRIVATE", aliases: [], products: ["tiktok", "douyin", "capcut"], execs: ["liang rubo", "zhang yiming"] },
-  { id: "canva", name: "Canva", ticker: "CANVA", exchange: "PRIVATE", aliases: [], products: ["canva magic studio"], execs: ["melanie perkins"] },
-  { id: "klarna", name: "Klarna", ticker: "KLARNA", exchange: "PRIVATE", aliases: [], products: [], execs: ["sebastian siemiatkowski"] },
-  { id: "epicgames", name: "Epic Games", ticker: "EPICGAMES", exchange: "PRIVATE", aliases: [], products: ["fortnite", "unreal engine"], execs: ["tim sweeney"] },
-  { id: "discord", name: "Discord", ticker: "DISCORD", exchange: "PRIVATE", aliases: [], products: [], execs: ["jason citron", "humam sakhnini"], ambiguousName: true },
-  { id: "perplexity", name: "Perplexity", ticker: "PERPLEXITY", exchange: "PRIVATE", aliases: ["perplexity ai"], products: ["comet browser"], execs: ["aravind srinivas"], ambiguousName: true },
-  { id: "mistral", name: "Mistral", ticker: "MISTRAL", exchange: "PRIVATE", aliases: ["mistral ai"], products: ["le chat"], execs: ["arthur mensch"], ambiguousName: true },
-  { id: "scaleai", name: "Scale AI", ticker: "SCALEAI", exchange: "PRIVATE", aliases: ["scale ai"], products: [], execs: [], ambiguousName: true },
+  { id: "stripe", name: "Stripe", ticker: "STRIPE", exchange: "PRIVATE", aliases: ["stripe inc"], products: ["stripe checkout", "stripe connect", "stripe atlas", "stripe radar", "stripe terminal"], execs: ["patrick collison", "john collison"], ambiguousName: true, blurb: "Payments infrastructure for internet businesses." },
+  { id: "databricks", name: "Databricks", ticker: "DATABRICKS", exchange: "PRIVATE", aliases: [], products: ["mosaicml", "unity catalog", "delta lake"], execs: ["ali ghodsi"], blurb: "A data and AI platform." },
+  { id: "xai", name: "xAI", ticker: "XAI", exchange: "PRIVATE", aliases: ["x ai"], products: ["grok", "colossus"], execs: [], ambiguousTicker: true, blurb: "The lab behind Grok." },
+  { id: "bytedance", name: "ByteDance", ticker: "BYTEDANCE", exchange: "PRIVATE", aliases: [], products: ["tiktok", "douyin", "capcut"], execs: ["liang rubo", "zhang yiming"], blurb: "The company behind TikTok." },
+  { id: "canva", name: "Canva", ticker: "CANVA", exchange: "PRIVATE", aliases: [], products: ["canva magic studio"], execs: ["melanie perkins"], blurb: "Design software in the browser." },
+  { id: "klarna", name: "Klarna", ticker: "KLARNA", exchange: "PRIVATE", aliases: [], products: [], execs: ["sebastian siemiatkowski"], blurb: "Buy now, pay later payments." },
+  { id: "epicgames", name: "Epic Games", ticker: "EPICGAMES", exchange: "PRIVATE", aliases: [], products: ["fortnite", "unreal engine"], execs: ["tim sweeney"], blurb: "Fortnite and the Unreal Engine." },
+  { id: "discord", name: "Discord", ticker: "DISCORD", exchange: "PRIVATE", aliases: [], products: [], execs: ["jason citron", "humam sakhnini"], ambiguousName: true, blurb: "A chat platform for communities." },
+  { id: "perplexity", name: "Perplexity", ticker: "PERPLEXITY", exchange: "PRIVATE", aliases: ["perplexity ai"], products: ["comet browser"], execs: ["aravind srinivas"], ambiguousName: true, blurb: "An AI search engine." },
+  { id: "mistral", name: "Mistral", ticker: "MISTRAL", exchange: "PRIVATE", aliases: ["mistral ai"], products: ["le chat"], execs: ["arthur mensch"], ambiguousName: true, blurb: "Open-weight AI models." },
+  { id: "scaleai", name: "Scale AI", ticker: "SCALEAI", exchange: "PRIVATE", aliases: ["scale ai"], products: [], execs: [], ambiguousName: true, blurb: "Training data for AI models." },
 ];
 
 /** News acronyms that are also tickers: bare in caps they are almost never the company. */

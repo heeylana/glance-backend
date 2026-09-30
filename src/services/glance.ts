@@ -63,6 +63,8 @@ export interface GlanceEntity {
   confidence: number;
   evidence: string[];
   tokenized: boolean;
+  /** A company with no listed shares. The card says so instead of leaving a bare name. */
+  private?: boolean;
   kind?: "stock" | "etf" | "pre-ipo";
   /** Every token of the company, xStocks first; the first one is what `mint` and `priceUsd` describe. */
   listings?: EntityListing[];
@@ -156,7 +158,7 @@ function listNames(names: string[]) {
 
 /** One company as the card shows it: its tokens, the live price, and the move since the page was published. */
 async function buildEntity(
-  who: { company: { id: string; name: string; ticker: string }; confidence: number; evidence: string[] },
+  who: { company: { id: string; name: string; ticker: string; exchange?: string; blurb?: string }; confidence: number; evidence: string[] },
   ctx: { tokens: MintEntry[]; latest: Map<string, RefPrice>; quotes: Map<string, MarketQuote>; publishedAt: Date | null },
 ): Promise<GlanceEntity> {
   const entry = ctx.tokens[0];
@@ -167,6 +169,9 @@ async function buildEntity(
     confidence: who.confidence,
     evidence: who.evidence,
     tokenized: !!entry,
+    ...(who.company.exchange === "PRIVATE" ? { private: true } : {}),
+    // Only reaches the card when there is no token: a tokenized company overrides this with the issuer's own text below.
+    ...(who.company.blurb ? { about: who.company.blurb } : {}),
   };
   if (!entry) return base;
   const listings: EntityListing[] = ctx.tokens.map((t) => {
