@@ -53,7 +53,17 @@ export interface TradeResult {
   amountOutRaw: string;
   usdcValue: number;
   usdPerShare: number;
+  /**
+   * The reference price the trade was checked against, and which feed it came from. It is only Pyth's when
+   * `priceSource` says so: with no Pyth key the reference falls back to Jupiter (services/prices.ts), and a card that
+   * said "checked against Pyth" then would be claiming something that did not happen.
+   */
   pythUsdPerShare: number;
+  priceSource: "pyth" | "jupiter" | "history";
+  /** How far the fill landed from that reference, in basis points, as guards/price.ts measured it. */
+  deviationBps: number;
+  /** The feed had not published recently and the wider off-hours band was used instead. */
+  priceStale: boolean;
   sharesDelta: number;
   positionShares: number;
   positionUsd: number;
@@ -275,6 +285,9 @@ export async function executeDelegatedSwap(req: TradeRequest): Promise<TradeResu
     usdcValue: usdcToUsd(req.side === "buy" ? fill.in : fill.out),
     usdPerShare,
     pythUsdPerShare: refUsd,
+    priceSource: ref.source,
+    deviationBps: pc.deviationBps,
+    priceStale: pc.stale,
     sharesDelta,
     positionShares,
     positionUsd,
