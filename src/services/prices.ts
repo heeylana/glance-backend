@@ -11,6 +11,7 @@
  * samples in price_history (spec §9 indexer), else null.
  */
 import { sql } from "drizzle-orm";
+import { tesseraTokens } from "./tessera.js";
 import { env } from "../config.js";
 import { priceKey, type MintEntry } from "../config/issuers.js";
 import type { PythPrice } from "../guards/price.js";
@@ -98,6 +99,12 @@ export interface MarketQuote {
   tokenUsd: number | null;
   /** The issuer's mark for what the token tracks (xStocks: the share; PreStocks and Tessera: their valuation). */
   markUsd: number | null;
+  /** Who marked it: "tessera" when the issuer's own API answered, "jupiter" for the generic feed. */
+  markSource: "tessera" | "jupiter" | null;
+  /** Wallets holding the token, where the issuer publishes it. */
+  holders: number | null;
+  /** The company's valuation behind the mark, in USD, where the issuer publishes it. */
+  markValuation: number | null;
   /** tokenUsd / markUsd − 1, in percent: positive is a premium. */
   premiumPct: number | null;
   liquidityUsd: number | null;
@@ -113,14 +120,21 @@ export async function getMarketQuotes(entries: MintEntry[]): Promise<Map<string,
   const out = new Map<string, MarketQuote>();
   if (entries.length === 0) return out;
   const lookup = entries.map((e) => e.referenceMint ?? e.mint);
-  const rows = await jupiterRows([...new Set(lookup)]);
+  // Jupiter prices the token from pools and marks what it tracks, but only for tokens that track a listed share.
+  // A private company has no listing, so Tessera's own numbers are asked for in parallel and win where they exist.
+  const [rows, tessera] = await Promise.all([jupiterRows([...new Set(lookup)]), tesseraTokens()]);
   entries.forEach((e, i) => {
     const r = rows.get(lookup[i]!);
+    const t = tessera.get(lookup[i]!);
     const tokenUsd = r?.usdPrice ?? null;
-    const markUsd = r?.stockData?.price ?? null;
+    // The issuer's own mark beats the generic one: it is what the token is actually written against.
+    const markUsd = t?.markPrice ?? r?.stockData?.price ?? null;
     out.set(e.mint, {
       tokenUsd,
       markUsd,
+      markSource: t ? "tessera" : markUsd !== null ? "jupiter" : null,
+      holders: t?.holders ?? null,
+      markValuation: t?.markValuation ?? null,
       premiumPct: premium(tokenUsd, markUsd),
       liquidityUsd: r?.liquidity ?? null,
       change24hPct: typeof r?.priceChange24h === "number" ? r.priceChange24h : null,

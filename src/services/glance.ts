@@ -46,6 +46,12 @@ export interface EntityListing {
   kind: "stock" | "etf" | "pre-ipo";
   tokenUsd: number | null;
   markUsd: number | null;
+  /** Who marked it: "tessera" when the issuer's own API answered, "jupiter" for the generic feed. */
+  markSource?: "tessera" | "jupiter" | null;
+  /** Wallets holding the token, where the issuer publishes it (Tessera does). */
+  holders?: number | null;
+  /** The company's valuation behind the mark, in USD, where the issuer publishes it. */
+  markValuation?: number | null;
   premiumPct: number | null;
   liquidityUsd: number | null;
 }
@@ -165,7 +171,19 @@ async function buildEntity(
   if (!entry) return base;
   const listings: EntityListing[] = ctx.tokens.map((t) => {
     const q = ctx.quotes.get(t.mint);
-    return { mint: t.mint, symbol: t.symbol, issuer: t.issuer, kind: t.kind, tokenUsd: q?.tokenUsd ?? null, markUsd: q?.markUsd ?? null, premiumPct: q?.premiumPct ?? null, liquidityUsd: q?.liquidityUsd ?? null };
+    return {
+      mint: t.mint,
+      symbol: t.symbol,
+      issuer: t.issuer,
+      kind: t.kind,
+      tokenUsd: q?.tokenUsd ?? null,
+      markUsd: q?.markUsd ?? null,
+      markSource: q?.markSource ?? null,
+      holders: q?.holders ?? null,
+      markValuation: q?.markValuation ?? null,
+      premiumPct: q?.premiumPct ?? null,
+      liquidityUsd: q?.liquidityUsd ?? null,
+    };
   });
   const px = ctx.latest.get(entry.mint);
   const priceUsd = px ? px.usd : null;
