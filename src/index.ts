@@ -12,7 +12,7 @@ import { routeProvider } from "./services/route.js";
 import { sampleAllPrices } from "./services/prices.js";
 import { lastTts, ttsEnabled, ttsProvider, warmTts } from "./services/tts.js";
 import { sttProvider } from "./services/stt.js";
-import { priceSource } from "./services/prices.js";
+import { priceSource, priceSourceWhy } from "./services/prices.js";
 import glanceRoutes from "./routes/glance.js";
 import tradeRoutes from "./routes/trade.js";
 import sessionRoutes from "./routes/session.js";
@@ -78,6 +78,8 @@ app.get("/health", (c) => {
      * trade to find out.
      */
     price: priceSource(),
+    // Only when it is not Pyth: whether a key arrived at all, and whether Pyth is in cooldown after refusing one.
+    ...(priceSource() === "pyth" ? {} : { priceWhy: priceSourceWhy() }),
     // Which provider and voice will speak, false when no key is set and the panel shows text in silence.
     voice: ttsEnabled() ? ttsProvider() : false,
     hearing: sttProvider() ?? false,

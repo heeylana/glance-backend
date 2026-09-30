@@ -34,6 +34,16 @@ export interface RefPrice {
 let pythDisabledUntil = 0;
 const PYTH_COOLDOWN_MS = 10 * 60_000;
 
+/**
+ * Why Pyth is not the live source, when it is not. Without this the two causes look identical from outside: a key that
+ * never reached the process (a misspelled variable parses fine and is silently ignored, since the schema marks it
+ * optional) and a key Pyth refused, which puts it in cooldown. The key itself is never reported, only whether one
+ * arrived.
+ */
+export function priceSourceWhy(): { key: boolean; cooldownSec: number } {
+  return { key: !!env.PYTH_API_KEY, cooldownSec: Math.max(0, Math.round((pythDisabledUntil - Date.now()) / 1000)) };
+}
+
 export function priceSource(): "pyth" | "jupiter" {
   if (env.PRICE_SOURCE === "auto") return env.PYTH_API_KEY && Date.now() >= pythDisabledUntil ? "pyth" : "jupiter";
   return env.PRICE_SOURCE;
