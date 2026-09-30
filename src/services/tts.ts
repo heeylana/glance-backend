@@ -148,12 +148,19 @@ export async function synthesize(text: string): Promise<{ bytes: Buffer; mime: s
  * per user and would never hit. The greeting and the empty states are not here: their wording lives in
  * the spec and the extension, not in this repo, and a guessed line would just be a wasted call.
  */
+/**
+ * Said the moment the user stops talking, while the answer is still being worked out. These are the most-heard lines
+ * in the product, so they are the ones that must never wait on the provider.
+ *
+ * They are the only warmed lines that do not come from a GuardCode, because the extension asks for them rather than
+ * the backend: the list is duplicated as ACK_LINES in entrypoints/content/index.ts. The two must match exactly, or the
+ * extension asks for a line this cache has never heard of and the acknowledgement takes a synthesis instead of being
+ * instant, which is the whole point of it. tts.test.ts pins this list so the copy here cannot drift silently.
+ */
+export const ACK_LINES: readonly string[] = ["One moment.", "Let me look.", "On it."];
+
 export const WARM_LINES: readonly string[] = [
-  // Said the moment the user stops talking, while the answer is still being worked out (the extension's ACK_LINES).
-  // These are the most-heard lines in the product, so they are the ones that must never wait on the provider.
-  "One moment.",
-  "Let me look.",
-  "On it.",
+  ...ACK_LINES,
   "Glance is paused.",
   "Glance needs a quick renewal to keep buying for you.",
   "That didn't go through — nothing was spent. Try again?",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GuardCode, userMessage } from "../lib/errors.js";
-import { normalizeSpeech, ttsEnabled, ttsKey, TTS_MAX_CHARS, WARM_LINES, warmTts } from "./tts.js";
+import { ACK_LINES, normalizeSpeech, ttsEnabled, ttsKey, TTS_MAX_CHARS, WARM_LINES, warmTts } from "./tts.js";
 
 describe("normalizeSpeech", () => {
   it("collapses whitespace and softens the em dash", () => {
@@ -47,7 +47,17 @@ describe("warm lines", () => {
 
   it("are the lines the backend actually says, so the warmed cache is hit", () => {
     const said = new Set(Object.values(GuardCode).map((c) => ttsKey(userMessage(c))));
-    for (const line of WARM_LINES) expect(said.has(ttsKey(line)), line).toBe(true);
+    // The acknowledgement lines are asked for by the extension, not produced by a guard, so they are checked below.
+    const fromGuards = WARM_LINES.filter((l) => !ACK_LINES.includes(l));
+    expect(fromGuards.length).toBeGreaterThan(0);
+    for (const line of fromGuards) expect(said.has(ttsKey(line)), line).toBe(true);
+  });
+
+  it("include the acknowledgement lines the extension asks for, spelled exactly as it spells them", () => {
+    // Duplicated in entrypoints/content/index.ts as ACK_LINES. One character of drift and the extension asks for a
+    // line this cache has never synthesized, so the acknowledgement waits on the provider instead of being instant.
+    expect(ACK_LINES).toEqual(["One moment.", "Let me look.", "On it."]);
+    for (const line of ACK_LINES) expect(WARM_LINES).toContain(line);
   });
 
   it.skipIf(ttsEnabled())("warming never throws, and does nothing without a key", async () => {
