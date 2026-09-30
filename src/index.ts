@@ -12,6 +12,7 @@ import { routeProvider } from "./services/route.js";
 import { sampleAllPrices } from "./services/prices.js";
 import { lastTts, ttsEnabled, ttsProvider, warmTts } from "./services/tts.js";
 import { sttProvider } from "./services/stt.js";
+import { priceSource } from "./services/prices.js";
 import glanceRoutes from "./routes/glance.js";
 import tradeRoutes from "./routes/trade.js";
 import sessionRoutes from "./routes/session.js";
@@ -70,6 +71,13 @@ app.get("/health", (c) => {
     vaultProgram: env.VAULT_PROGRAM_ID,
     agent: agentKeypair().publicKey.toBase58(),
     console: env.WEB_CONSOLE_URL,
+    /**
+     * Which feed guard 6 is actually checking fills against right now. It is not a setting: with PRICE_SOURCE on auto
+     * it is Pyth only while a key is present and Pyth has not been put in cooldown by recent failures, so a lapsed key
+     * silently becomes "jupiter" here. Worth a glance before a demo, since the alternative is spending money on a
+     * trade to find out.
+     */
+    price: priceSource(),
     // Which provider and voice will speak, false when no key is set and the panel shows text in silence.
     voice: ttsEnabled() ? ttsProvider() : false,
     hearing: sttProvider() ?? false,
