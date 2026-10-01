@@ -28,6 +28,14 @@ function anthropic(): Anthropic | null {
   return client;
 }
 
+/**
+ * What /health reports about the model calls. `disabled` flips the first time the SDK refuses our
+ * credentials, so a key that is present but wrong reads very differently here from one that is absent.
+ */
+export function brainWhy(): { key: boolean; disabled: boolean } {
+  return { key: !!env.ANTHROPIC_API_KEY, disabled };
+}
+
 function handleError(e: unknown, where: string): null {
   // No API key and no `ant auth login` profile: the SDK throws a generic error at request time.
   if (e instanceof Error && /Could not resolve authentication method/i.test(e.message)) {

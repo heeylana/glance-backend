@@ -12,6 +12,8 @@ import { routeProvider } from "./services/route.js";
 import { sampleAllPrices } from "./services/prices.js";
 import { lastTts, ttsEnabled, ttsProvider, warmTts } from "./services/tts.js";
 import { sttProvider } from "./services/stt.js";
+import { newsWhy } from "./services/news.js";
+import { brainWhy } from "./services/llm.js";
 import { priceSource, priceSourceWhy } from "./services/prices.js";
 import glanceRoutes from "./routes/glance.js";
 import tradeRoutes from "./routes/trade.js";
@@ -83,6 +85,10 @@ app.get("/health", (c) => {
     // Which provider and voice will speak, false when no key is set and the panel shows text in silence.
     voice: ttsEnabled() ? ttsProvider() : false,
     hearing: sttProvider() ?? false,
+    // "Why did it move?" needs both: headlines to read and a model to read them with. Either one
+    // missing produces the same flat "I can't check the news right now", so report them separately.
+    news: newsWhy(),
+    brain: brainWhy(),
     lastTts,
   });
 });
