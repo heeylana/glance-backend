@@ -30,16 +30,16 @@ const CACHE_MS = 120_000;
 const cache = new Map<string, { at: number; items: FinnhubItem[] }>();
 
 /**
- * Why the last fetch came back empty, for /health. A missing key and a key the provider refuses both
- * end as "no headlines" at the call site, and the two need very different fixes, so keep them apart.
+ * The last fetch attempt, for /health. Record every attempt, not just failures: a provider that
+ * answers politely with an empty list looks identical from the call site to one that was never
+ * asked, and those need opposite fixes. `count` is what the caller actually received.
  */
-let lastFail: { at: number; why: string } | null = null;
+let last: { at: number; ok: boolean; count: number; why: string } | null = null;
 
-export function newsWhy(): { key: boolean; lastError: string | null; agoSec: number | null } {
+export function newsWhy(): { key: boolean; last: { ok: boolean; count: number; why: string; agoSec: number } | null } {
   return {
     key: !!env.NEWS_API_KEY,
-    lastError: lastFail ? lastFail.why.slice(0, 120) : null,
-    agoSec: lastFail ? Math.round((Date.now() - lastFail.at) / 1000) : null,
+    last: last ? { ok: last.ok, count: last.count, why: last.why.slice(0, 160), agoSec: Math.round((Date.now() - last.at) / 1000) } : null,
   };
 }
 
@@ -92,18 +92,19 @@ async function companyNews(symbol: string, days: number): Promise<FinnhubItem[]>
  */
 export async function fetchHeadlines(p: { ticker: string; name: string; sinceMinutes: number }): Promise<Headline[]> {
   if (!env.NEWS_API_KEY) {
-    lastFail = { at: Date.now(), why: "NEWS_API_KEY is not set" };
+    last = { at: Date.now(), ok: false, count: 0, why: "NEWS_API_KEY is not set" };
     return [];
   }
   try {
     const raw = await companyNews(p.ticker, Math.max(1, Math.ceil(p.sinceMinutes / 1440)));
-    lastFail = null;
     const about = raw.filter((it) => mentions({ title: it.headline, summary: it.summary }, p));
     // A symbol feed with nothing naming the company is still about the company; keep it rather than go silent.
     const items = about.length ? about : raw;
-    return withinWindow(mapFinnhub(items), p.sinceMinutes).slice(0, MAX_HEADLINES);
+    const out = withinWindow(mapFinnhub(items), p.sinceMinutes).slice(0, MAX_HEADLINES);
+    last = { at: Date.now(), ok: true, count: out.length, why: `${p.ticker} ${p.sinceMinutes}m: provider returned ${raw.length}, ${out.length} inside the window` };
+    return out;
   } catch (e) {
-    lastFail = { at: Date.now(), why: String(e) };
+    last = { at: Date.now(), ok: false, count: 0, why: String(e) };
     log.warn("news fetch failed", { ticker: p.ticker, err: String(e) });
     return [];
   }

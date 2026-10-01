@@ -29,14 +29,27 @@ function anthropic(): Anthropic | null {
 }
 
 /**
- * What /health reports about the model calls. `disabled` flips the first time the SDK refuses our
- * credentials, so a key that is present but wrong reads very differently here from one that is absent.
+ * What /health reports about the model calls. `disabled` flips only when the SDK refuses our
+ * credentials; every other way a call can come back empty (a refusal, a cut-off answer, an answer
+ * that will not parse, a rate limit, a model this account cannot reach) leaves it false and returns
+ * null just the same, so keep the last outcome too or every one of them looks like "no news".
  */
-export function brainWhy(): { key: boolean; disabled: boolean } {
-  return { key: !!env.ANTHROPIC_API_KEY, disabled };
+let lastLlm: { at: number; route: string; why: string } | null = null;
+
+function noteLlm(route: string, why: string): void {
+  lastLlm = { at: Date.now(), route, why };
+}
+
+export function brainWhy(): { key: boolean; disabled: boolean; last: { route: string; why: string; agoSec: number } | null } {
+  return {
+    key: !!env.ANTHROPIC_API_KEY,
+    disabled,
+    last: lastLlm ? { route: lastLlm.route, why: lastLlm.why.slice(0, 160), agoSec: Math.round((Date.now() - lastLlm.at) / 1000) } : null,
+  };
 }
 
 function handleError(e: unknown, where: string): null {
+  noteLlm(where, String(e));
   // No API key and no `ant auth login` profile: the SDK throws a generic error at request time.
   if (e instanceof Error && /Could not resolve authentication method/i.test(e.message)) {
     disabled = true;
@@ -153,7 +166,10 @@ async function structured<T>(
   options: { timeout?: number; maxRetries?: number; effort?: "low" | "medium" | "high"; thinking?: "off" } = {},
 ): Promise<T | null> {
   const c = anthropic();
-  if (!c) return null;
+  if (!c) {
+    noteLlm(route, "no anthropic client");
+    return null;
+  }
   const { effort = "low", thinking, ...request } = options;
   try {
     const res = await c.beta.messages.create(
@@ -168,6 +184,7 @@ async function structured<T>(
     recordUsage(route, res);
     if (res.stop_reason === "refusal" || res.stop_reason === "max_tokens") {
       log.warn(res.stop_reason === "refusal" ? "llm refused" : "llm answer cut off", { route, model: res.model });
+      noteLlm(route, `stop_reason ${res.stop_reason}`);
       return null;
     }
     let json: unknown;
@@ -175,14 +192,17 @@ async function structured<T>(
       json = JSON.parse(res.content.map((b) => (b.type === "text" ? b.text : "")).join(""));
     } catch {
       log.warn("llm answer is not json", { route, model: res.model });
+      noteLlm(route, "answer was not json");
       return null;
     }
     const fit = fitToSchema(schema, json);
     if (!fit.ok) {
       log.warn("llm answer does not fit its schema", { route, model: res.model, error: fit.error });
+      noteLlm(route, `answer did not fit schema: ${fit.error}`);
       return null;
     }
     if (fit.clipped.length) log.info("llm answer clipped", { route, model: res.model, fields: fit.clipped });
+    noteLlm(route, `ok (${res.model})`);
     return fit.data;
   } catch (e) {
     return handleError(e, route);
