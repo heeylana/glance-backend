@@ -35,7 +35,6 @@
     }
   },
   "type": "module",
-  "packageManager": "pnpm@11.0.9",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",
     "@coral-xyz/anchor": "^0.32.1",
