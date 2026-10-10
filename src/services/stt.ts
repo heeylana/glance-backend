@@ -7,7 +7,7 @@
  */
 import { env } from "../config.js";
 import { log } from "../lib/log.js";
-import { deepgramReady, listen as deepgramListen } from "./deepgram.js";
+import { deepgramReady, listen as deepgramListen, listenAudio } from "./deepgram.js";
 
 const FISH_ASR = "https://api.fish.audio/v1/asr";
 /** ~45 s of 16 kHz mono 16-bit PCM; the extension stops recording at 30 s. */
@@ -68,4 +68,45 @@ export async function transcribe(wav: Uint8Array<ArrayBuffer>): Promise<string |
     log.warn("stt failed", { err: String(e) });
     return null;
   }
+}
+
+/**
+ * A chat voice note (OGG/Opus from WhatsApp and Telegram, MP4/AAC from some phones): Deepgram decodes
+ * those itself; without it, ffmpeg on the host turns the clip into the 16 kHz WAV Fish takes. Null when
+ * neither path is available, which the caller reports as "I can't hear you right now".
+ */
+export async function transcribeAudio(audio: Uint8Array<ArrayBuffer>, mime: string): Promise<string | null> {
+  const base = mime.split(";")[0]!.trim().toLowerCase();
+  if (base === "audio/wav" || base === "audio/x-wav" || base === "audio/wave") return transcribe(audio);
+  if (deepgramReady()) {
+    const heard = await listenAudio(audio, base).catch(() => null);
+    if (heard) return heard;
+  }
+  if (!env.FISH_AUDIO_API_KEY) return null;
+  const wav = await ffmpegToWav(audio).catch((e) => {
+    log.warn("ffmpeg convert failed", { err: String(e) });
+    return null;
+  });
+  return wav ? transcribe(wav) : null;
+}
+
+/** Decode with ffmpeg on PATH → 16 kHz mono 16-bit WAV. Rejects when ffmpeg is missing. */
+export async function ffmpegToWav(audio: Uint8Array): Promise<Uint8Array<ArrayBuffer>> {
+  const { spawn } = await import("node:child_process");
+  return new Promise((resolve, reject) => {
+    const ff = spawn("ffmpeg", ["-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-ar", "16000", "-ac", "1", "-f", "wav", "pipe:1"], { stdio: ["pipe", "pipe", "pipe"] });
+    const chunks: Buffer[] = [];
+    let err = "";
+    ff.stdout.on("data", (d: Buffer) => chunks.push(d));
+    ff.stderr.on("data", (d: Buffer) => (err += d.toString()));
+    ff.on("error", reject);
+    ff.on("close", (code) => {
+      if (code !== 0) return reject(new Error(err || `ffmpeg exited ${code}`));
+      const buf = Buffer.concat(chunks);
+      if (buf.length > STT_MAX_BYTES) return reject(new Error("clip too long"));
+      resolve(new Uint8Array(buf) as Uint8Array<ArrayBuffer>);
+    });
+    ff.stdin.on("error", () => undefined);
+    ff.stdin.end(Buffer.from(audio));
+  });
 }

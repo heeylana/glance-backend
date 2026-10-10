@@ -30,6 +30,12 @@ import voiceRoutes from "./routes/voice.js";
 import explainRoutes from "./routes/explain.js";
 import rememberRoutes from "./routes/remember.js";
 import { loadSkills, watchSkills } from "./services/skills.js";
+import { v1App } from "./routes/v1/index.js";
+import { apiClients, parseClients } from "./routes/v1/_auth.js";
+import { countBindings, sweepSessions } from "./services/connect.js";
+import { countOpenQuotes } from "./services/quotes.js";
+import { countImages, sweepImages } from "./services/images.js";
+import { scanAgentExpiry } from "./services/expiry-scan.js";
 
 const app = new Hono();
 
@@ -61,8 +67,12 @@ app.onError((err, c) => {
   return c.json({ ok: false, code: "INTERNAL", message: userMessage(GuardCode.SUBMIT_FAILED) }, 500);
 });
 
-app.get("/health", (c) => {
+app.get("/health", async (c) => {
   const reg = loadRegistry();
+  // The chat API's footprint: how many bots hold a credential, how many people are bound, what is in flight.
+  const api = await Promise.all([countBindings(), countOpenQuotes(), countImages()])
+    .then(([bindings, quotesOpen, imagesStored]) => ({ clients: apiClients().size, bindings, quotesOpen, imagesStored }))
+    .catch((e) => ({ clients: apiClients().size, error: String(e) }));
   return c.json({
     ok: true,
     cluster: env.SOLANA_CLUSTER,
@@ -90,10 +100,14 @@ app.get("/health", (c) => {
     news: newsWhy(),
     brain: brainWhy(),
     lastTts,
+    api,
   });
 });
 
 app.route("/", authPublicRoutes);
+// The chat API carries its own auth (a bot credential, then the channel user's binding), so it mounts
+// before the owner-JWT `auth` below takes "*".
+app.route("/v1", v1App());
 // Public routes go before the first router that installs `auth` on "*": in Hono that middleware then
 // guards every route mounted after it, which had put the passive dictionary behind sign-in.
 app.route("/", dictionaryRoutes);
@@ -141,6 +155,9 @@ function checkConfig() {
     log.error("ROUTE_PROVIDER=jupiter on devnet: Jupiter has no devnet deployment. Set ROUTE_PROVIDER=desk (or leave it empty).");
   }
   if (reg.byMint.size === 0) log.error("issuer registry has no mints", { file: reg.file });
+  const { clients, rejected } = parseClients(env.API_CLIENTS, env.API_WEBHOOKS);
+  if (rejected.length) log.error("API_CLIENTS: a client was skipped (needs id:secret with a secret of 16+ characters)", { ids: rejected });
+  if (clients.size) log.info("api clients", { ids: [...clients.keys()], webhooks: [...clients.values()].filter((x) => x.webhookUrl).map((x) => x.id) });
 }
 
 if (process.env.NODE_ENV !== "test") {
@@ -158,6 +175,13 @@ if (process.env.NODE_ENV !== "test") {
       .catch((e) => log.warn("price sampling failed", { err: String(e) }));
   setTimeout(sample, 5_000);
   setInterval(sample, 3_600_000).unref();
+  // The chat API's housekeeping, hourly: spent connect links, images past their day, and the agent-expiry warnings.
+  const housekeeping = () =>
+    Promise.all([sweepSessions(), sweepImages(), scanAgentExpiry()])
+      .then(([sessions, images, expiry]) => log.info("api housekeeping", { sessionsDeleted: sessions, imagesDeleted: images, ...expiry }))
+      .catch((e) => log.warn("api housekeeping failed", { err: String(e) }));
+  setTimeout(housekeeping, 15_000);
+  setInterval(housekeeping, 3_600_000).unref();
   // The fixed spoken lines, in the background: boot never waits on Fish, and a failure only means a cold first call.
   if (ttsEnabled())
     setTimeout(() => {

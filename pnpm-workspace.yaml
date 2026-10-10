@@ -1,5 +1,16 @@
+# The backend is a single package. The list is here because pnpm 9 (still the default on some build hosts)
+# refuses a workspace file without one; pnpm 11 is pinned in package.json.
+packages:
+  - "."
 allowBuilds:
   bigint-buffer: true
   bufferutil: true
   esbuild: true
+  sharp: true
   utf-8-validate: true
+onlyBuiltDependencies:
+  - bigint-buffer
+  - bufferutil
+  - esbuild
+  - sharp
+  - utf-8-validate

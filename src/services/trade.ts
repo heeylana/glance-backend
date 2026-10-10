@@ -21,13 +21,18 @@ import { log } from "../lib/log.js";
 import { checkCaps } from "../guards/caps.js";
 import { classifySwapDirection } from "../guards/issuer.js";
 import { checkQuoteAgainstPyth } from "../guards/price.js";
-import { loadRegistry } from "../config/issuers.js";
+import { loadRegistry, tradableFor, type MintEntry } from "../config/issuers.js";
+import { ensureTradable } from "./mocks.js";
+import type { RouteProvider, RouteQuote } from "./route.js";
+import type { VaultView } from "./vault.js";
+import type { RefPrice } from "./prices.js";
 import { COMPANIES } from "../resolver/companies.js";
 import { asPythPrice, getReferencePrice } from "./prices.js";
 import { routeProvider } from "./route.js";
 import { simulateWithBalances } from "./simulate.js";
 import { agentKeypair, deskKeypair } from "./keys.js";
 import { compileTx, fetchVault, ixExecuteSwapDesk, tokenProgramFor, vaultPda, viewOf } from "./vault.js";
+import type { PythPrice } from "../guards/price.js";
 import * as store from "./store.js";
 
 export interface TradeContext {
@@ -95,7 +100,65 @@ async function fillFromChain(signature: string, vault: string, inputMint: string
   return { in: sum(inputMint, pre) - sum(inputMint, post), out: sum(outputMint, post) - sum(outputMint, pre) };
 }
 
-export async function executeDelegatedSwap(req: TradeRequest): Promise<TradeResult> {
+
+/**
+ * The mint that trades on this cluster for a buy: an entry already tradable, a catalog listing (on
+ * devnet its mock is created the first time), or a company ticker (its first listing).
+ */
+export async function resolveBuyMint(mint: string | undefined, ticker: string | undefined): Promise<string> {
+  const reg = loadRegistry();
+  if (mint && reg.byMint.has(mint)) return mint;
+  const listing = mint ? reg.listings.get(mint) : ticker ? reg.listingsByTicker.get(ticker.toUpperCase())?.[0] : undefined;
+  if (listing) return (await ensureTradable(listing)).mint;
+  if (mint) throw new GuardError(GuardCode.OUTPUT_MINT_NOT_ISSUER, {}, "mint is not in the catalog");
+  if (ticker) throw new GuardError(GuardCode.MINT_NOT_TOKENIZED, { companyName: COMPANIES.find((c) => c.ticker === ticker.toUpperCase())?.name ?? ticker });
+  throw new GuardError(GuardCode.BAD_REQUEST, {}, "outputMint or ticker required");
+}
+
+/** A sell needs a mint the vault can hold: an entry tradable here (never creates anything). */
+export function resolveSellMint(mint: string | undefined, ticker: string | undefined): string {
+  const reg = loadRegistry();
+  if (mint && reg.byMint.has(mint)) return mint;
+  if (mint) {
+    const tradable = tradableFor(mint);
+    if (tradable) return tradable.mint;
+  }
+  const byTicker = ticker ? reg.byTicker.get(ticker.toUpperCase()) : undefined;
+  if (byTicker) return byTicker.mint;
+  throw new GuardError(GuardCode.BAD_REQUEST, {}, "no position to sell for that mint or ticker");
+}
+
+/**
+ * A swap after every pre-check and the desk quote, before anything is built or signed. The chat bot
+ * shows this as a quote and asks for one confirmation (doc/glance-whatsapp-bot-implementation-checklist.md
+ * §1.5); the extension goes straight on to `executePrepared`. Nothing here reserves anything: caps,
+ * balance and the price band are checked again when the swap is executed.
+ */
+export interface PreparedSwap {
+  req: TradeRequest;
+  t0: number;
+  owner: PublicKey;
+  vaultAddr: PublicKey;
+  entry: MintEntry;
+  companyName: string;
+  view: VaultView;
+  inputMint: string;
+  outputMint: string;
+  stockMint: PublicKey;
+  stockProgram: PublicKey;
+  ref: RefPrice;
+  refUsd: number;
+  px: PythPrice;
+  amountIn: bigint;
+  inBalance: bigint;
+  dailyCapUsd: number;
+  route: RouteProvider;
+  desk: PublicKey;
+  quote: RouteQuote;
+  pc: ReturnType<typeof checkQuoteAgainstPyth> & { ok: true };
+}
+
+export async function prepareSwap(req: TradeRequest): Promise<PreparedSwap> {
   const t0 = Date.now();
   const { user, session } = await store.ensureUser(req.owner);
   const owner = new PublicKey(user.walletAddress);
@@ -132,7 +195,11 @@ export async function executeDelegatedSwap(req: TradeRequest): Promise<TradeResu
   const usdcMint = new PublicKey(env.USDC_MINT);
 
   // Reference price.
-  const ref = await getReferencePrice(entry);
+  // A feed error (Jupiter rate-limits bursts) is the same as no price: refuse with the plain line, not a 500.
+  const ref = await getReferencePrice(entry).catch((e) => {
+    log.warn("reference price failed", { mint: req.stockMint, err: String(e) });
+    return null;
+  });
   if (!ref) throw new GuardError(GuardCode.PRICE_UNAVAILABLE);
   const refUsd = ref.source === "pyth" && ref.feedKind === "equity" ? ref.usd * (facts?.uiMultiplier ?? 1) : ref.usd;
   const px = asPythPrice({ ...ref, usd: refUsd });
@@ -182,6 +249,42 @@ export async function executeDelegatedSwap(req: TradeRequest): Promise<TradeResu
     log.warn("price guard rejected", { owner: req.owner, mint: req.stockMint, ...pc });
     throw new GuardError(pc.code, { detail: pc });
   }
+
+  return { req, t0, owner, vaultAddr, entry, companyName: companyName!, view, inputMint, outputMint, stockMint, stockProgram, ref, refUsd, px, amountIn, inBalance, dailyCapUsd, route, desk, quote, pc };
+}
+
+/** What a prepared swap would do, in the units the user reads: for the chat quote and its confirmation line. */
+export function quoteOf(p: PreparedSwap) {
+  const buy = p.req.side === "buy";
+  const usd = usdcToUsd(buy ? p.amountIn : p.quote.outAmount);
+  const shares = rawToDecimal(buy ? p.quote.outAmount : p.amountIn, p.entry.decimals);
+  return {
+    side: p.req.side,
+    ticker: p.entry.ticker,
+    companyName: p.companyName,
+    mint: p.req.stockMint,
+    usd,
+    shares,
+    usdPerShare: p.pc.impliedUsdPerShare,
+    referenceUsdPerShare: p.refUsd,
+    priceSource: p.ref.source,
+    priceStale: p.pc.stale,
+    amountInRaw: p.amountIn.toString(),
+    estAmountOutRaw: p.quote.outAmount.toString(),
+    maxSlippageBps: p.view.maxSlippageBps || env.DEFAULT_MAX_SLIPPAGE_BPS,
+    dailyCapUsd: p.dailyCapUsd,
+    remainingTodayUsd: Math.max(0, p.dailyCapUsd - usdcToUsd(p.view.dailySpent) - (buy ? usd : 0)),
+  };
+}
+
+export async function executeDelegatedSwap(req: TradeRequest): Promise<TradeResult> {
+  return executePrepared(await prepareSwap(req));
+}
+
+/** Build, simulate, sign (agent + desk), send, confirm, and write the ledger and journal. */
+export async function executePrepared(p: PreparedSwap): Promise<TradeResult> {
+  const { req, t0, vaultAddr, entry, companyName, view, inputMint, outputMint, stockMint, stockProgram, ref, refUsd, amountIn, inBalance, dailyCapUsd, route, desk, quote, pc } = p;
+  const owner = p.owner;
 
   // Build the vault instruction: the program enforces destination, caps, direction, issuer on-chain.
   const ix = await ixExecuteSwapDesk({
@@ -278,7 +381,7 @@ export async function executeDelegatedSwap(req: TradeRequest): Promise<TradeResu
     side: req.side,
     signature,
     ticker: entry.ticker,
-    companyName: companyName!,
+    companyName,
     mint: req.stockMint,
     amountInRaw: fill.in.toString(),
     amountOutRaw: fill.out.toString(),

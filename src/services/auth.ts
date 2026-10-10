@@ -60,6 +60,31 @@ export async function verifyAndIssue(p: { pubkey: string; nonce: string; signatu
   return { token: await issueToken(p.pubkey), owner: p.pubkey };
 }
 
+/** An ed25519 signature (base58 or base64) over `message` by `pubkey`. False for a malformed key or signature. */
+export function verifySignature(pubkey: string, message: string, signature: string): boolean {
+  let sig: Uint8Array;
+  let key: Uint8Array;
+  try {
+    sig = signature.length > 100 ? bs58.decode(signature) : Buffer.from(signature, "base64");
+    if (sig.length !== 64) sig = bs58.decode(signature);
+    key = new PublicKey(pubkey).toBytes();
+  } catch {
+    return false;
+  }
+  if (sig.length !== 64) return false;
+  return nacl.sign.detached.verify(new TextEncoder().encode(message), sig, key);
+}
+
+/**
+ * The message a wallet signs to tie itself to a chat channel (the WhatsApp connect page). It names the
+ * code and the masked number so a forwarded link signs for the wrong number in plain sight; the code's
+ * own 15-minute life is its freshness. No timestamp, so the page never has to echo one back.
+ */
+export function connectMessage(p: { wallet: string; code: string; channel: string; maskedUser: string }): string {
+  const channel = p.channel === "whatsapp" ? "WhatsApp" : p.channel === "telegram" ? "Telegram" : p.channel;
+  return `Glance connect\n\nWallet: ${p.wallet}\nCode: ${p.code}\n${channel}: ${p.maskedUser}\n\nThis links this wallet to that ${channel} account for Glance. It costs nothing and moves nothing.`;
+}
+
 export async function issueToken(owner: string): Promise<string> {
   return new SignJWT({ sub: owner })
     .setProtectedHeader({ alg: "HS256" })

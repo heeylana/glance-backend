@@ -96,7 +96,7 @@ function modelParams(model: string) {
   return { model, ...fallbackParams(model) };
 }
 
-export type LlmRoute = "disambiguate" | "explainMove" | "readScreenshot" | "counterView" | "stockRead" | "interpretCommand" | "explainPage" | "notePage";
+export type LlmRoute = "disambiguate" | "explainMove" | "readScreenshot" | "readImage" | "counterView" | "stockRead" | "interpretCommand" | "explainPage" | "notePage";
 
 export interface UsageLine {
   route: LlmRoute;
@@ -571,4 +571,62 @@ export async function explainPage(p: ExplainPromptInput): Promise<Explanation | 
     effort: env.LLM_VISION_EFFORT,
     thinking: env.LLM_VISION_THINKING === "off" ? "off" : undefined,
   });
+}
+
+// ---------------------------------------------------------------- chat images (doc/glance-whatsapp-bot-implementation-checklist.md §4.2)
+
+const PixelBox = z.object({ x: z.number(), y: z.number(), w: z.number(), h: z.number() });
+const ImageCompanySchema = z.object({
+  name: z.string().max(80).describe("the company's usual name"),
+  ticker: z.string().max(12).nullable().describe("its ticker if the image shows one, else null"),
+  box: PixelBox.nullable().describe("image pixels around the place its name or ticker is most prominent, or null when it is only implied"),
+});
+const ImageChartSchema = z.object({
+  ticker: z.string().max(12).nullable().describe("the ticker the chart is of, as shown, or null"),
+  name: z.string().max(80).nullable().describe("the company or asset name shown, or null"),
+  timeframe: z.string().max(24).nullable().describe("the selected range as shown (1D, 5D, 1M, 1Y, …), or null"),
+  from: z.number().nullable().describe("the price at the left edge of the line, read off the axis"),
+  to: z.number().nullable().describe("the price at the right edge of the line"),
+  plot: PixelBox.nullable().describe("image pixels of the area the line or candles sit in, without axis labels"),
+  ticks: z.array(z.object({ price: z.number(), y: z.number() })).max(2).nullable().describe("two labelled prices on the price axis, far apart, each with the y pixel of the centre of its label"),
+  levels: z.array(z.object({ price: z.number(), label: z.string().max(32).nullable() })).max(6).describe("prices worth pointing at: the high, the low, a level the line bounced off; empty when none"),
+  describe: z.string().max(240).describe("what the chart shows in one or two plain sentences: the move, from what to what, over the range. No prediction."),
+});
+const ImageReadSchema = z.object({
+  kind: z.enum(["headline", "post", "article", "chart", "other"]).describe("what the image is: a news headline or card, a social post, an article body, a price chart, or something else"),
+  headline: z.string().max(300).nullable().describe("the main headline or title visible, or null"),
+  text: z.string().max(2000).describe("the visible text in reading order, up to about 1500 characters; captions and usernames included"),
+  companies: z.array(ImageCompanySchema).max(10).describe("publicly traded companies the content is about or names, most prominent first"),
+  chart: ImageChartSchema.nullable().describe("filled in only when kind is chart"),
+});
+export type ImageRead = z.infer<typeof ImageReadSchema>;
+export type ImageCompany = z.infer<typeof ImageCompanySchema>;
+export type ImageChart = z.infer<typeof ImageChartSchema>;
+
+/**
+ * A chat screenshot or chart, read once: its text, the companies with where their names sit (so the
+ * annotated copy can ring them), and for a chart what it shows with the axis geometry that places price
+ * levels. On the model that sees the pixels, like "show me", because the boxes have to be right.
+ */
+export async function readImage(p: { base64: string; mediaType: "image/jpeg" | "image/png" | "image/webp"; width: number; height: number }): Promise<ImageRead | null> {
+  return structured(
+    "readImage",
+    visionModel(),
+    ImageReadSchema,
+    {
+      max_tokens: 3000,
+      system:
+        "You read a screenshot someone sent to a chat: a news headline, a social post, an article, or a price chart. Transcribe the visible text in reading order; name the publicly traded companies it is about; give each company's box in image pixels (origin top-left) around the most prominent place its name or ticker appears, or null if the company is only implied. For a chart, read the ticker, the range, the start and end prices and two labelled prices on the axis with the y pixel of each label's centre, and describe the move in plain words without predicting. Transcribe faithfully; invent nothing that is not visible.",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: p.mediaType, data: p.base64 } },
+            { type: "text", text: `The image is ${p.width}×${p.height} pixels. Read it.` },
+          ],
+        },
+      ],
+    },
+    { effort: "low", timeout: 20_000 },
+  );
 }

@@ -98,6 +98,20 @@ const Env = z.object({
   DEEPGRAM_TTS_VOICE: z.string().default("aura-2-apollo-en"),
   /** Deepgram speech-to-text model. nova-3 is the one that takes `keyterm` prompting. */
   DEEPGRAM_STT_MODEL: z.string().default("nova-3"),
+
+  // ---- The Glance API (/v1): bots as clients, people bound by channel (doc/glance-whatsapp-bot-implementation-checklist.md)
+  /** Comma-separated `id:secret` pairs. Each bot gets one; the secret is hashed in memory at start and never logged. Empty = /v1 refuses every bot call. */
+  API_CLIENTS: z.string().optional(),
+  /** Comma-separated `id=url`: where the API posts signed webhooks (agent expiry warnings) for that client. HMAC-SHA256 with the client's secret. */
+  API_WEBHOOKS: z.string().optional(),
+  /** Where connect links point (the console hosts /connect/<code>). Defaults to WEB_CONSOLE_URL. */
+  CONNECT_URL_BASE: z.string().url().optional(),
+  CONNECT_TTL_MIN: z.coerce.number().default(15),
+  /** A chat quote lives this long before execute refuses it (the spec says 2 minutes, because the quote does). */
+  QUOTE_TTL_SEC: z.coerce.number().default(120),
+  /** Where chat images are kept until the sweep deletes them. A volume path on hosts that reset files on deploy. */
+  IMAGE_DIR: z.string().default("./.images"),
+  IMAGE_TTL_HOURS: z.coerce.number().default(24),
 });
 
 export type Env = z.infer<typeof Env>;

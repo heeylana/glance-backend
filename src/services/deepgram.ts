@@ -119,11 +119,16 @@ export async function speak(line: string): Promise<{ bytes: Buffer; mime: string
 
 /** The transcript of one push-to-talk take, or null when Deepgram has no key or refuses. */
 export async function listen(wav: Uint8Array): Promise<string | null> {
+  return listenAudio(wav, "audio/wav");
+}
+
+/** The same for any container Deepgram decodes itself: a WhatsApp voice note is OGG/Opus, a Telegram one too. */
+export async function listenAudio(audio: Uint8Array, mime: string): Promise<string | null> {
   if (!env.DEEPGRAM_API_KEY) return null;
   const q = new URLSearchParams({ model: env.DEEPGRAM_STT_MODEL, smart_format: "true", language: "en", punctuate: "true" });
   for (const term of KEYTERMS) q.append("keyterm", term);
   try {
-    const res = await post(`/v1/listen?${q}`, Buffer.from(wav), { "content-type": "audio/wav" }, 15_000);
+    const res = await post(`/v1/listen?${q}`, Buffer.from(audio), { "content-type": mime }, 15_000);
     if (!res.ok) {
       log.warn("deepgram stt failed", { status: res.status, body: res.bytes.toString("utf8").slice(0, 200) });
       return null;
